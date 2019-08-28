@@ -1,0 +1,29 @@
+# file-exclusions
+*.so
+*.a
+*.out
+*.o
+*.lib
+*.swp
+*.swo
+*.pyc
+*.pyo
+*.ini
+
+# folder-exclusions
+build/
+.vscode/
+_legacy/
+dist/
+pytysoc.egg-info/
+tysoc_dart.egg-info/
+
+# dependencies-exclusions
+ext/cat1
+ext/imgui
+ext/pybind11
+ext/dart*
+core/
+
+# specific file-exclusions
+model_info.txt
