@@ -1,6 +1,7 @@
 
 message( "Configuring tysoc-dart::base_test_interface" )
 
+include_directories( "/usr/include/bullet" )
 include_directories( "${CMAKE_SOURCE_DIR}/ext/dart" )
 include_directories( "${CMAKE_BINARY_DIR}/ext/dart" )
 include_directories( "${CMAKE_SOURCE_DIR}/ext/cat1/include" )
@@ -14,4 +15,5 @@ target_link_libraries( test_interface
                        tysocCore
                        cat1
                        imgui
-                       dart )
+                       dart
+                       dart-collision-bullet )

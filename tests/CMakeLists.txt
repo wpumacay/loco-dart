@@ -1,6 +1,7 @@
 
 message( "Configuring tysoc-dart::tests" )
 
+include_directories( "/usr/include/bullet" )
 include_directories( "${CMAKE_SOURCE_DIR}/ext/dart" )
 include_directories( "${CMAKE_BINARY_DIR}/ext/dart" )
 include_directories( "${CMAKE_SOURCE_DIR}/ext/cat1/include" )
