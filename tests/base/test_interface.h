@@ -217,6 +217,9 @@ namespace dart
         std::vector< SimBody* >             m_simBodies;
         std::map< std::string, SimBody* >   m_simBodiesMap;
 
+        std::vector< SimAgent* >            m_simAgents;
+        std::map< std::string, SimAgent* >  m_simAgentsMap;
+
         bool m_isRunning;
         bool m_isTerminated;
 
@@ -252,7 +255,7 @@ namespace dart
 
         SimBody* createSingleBody( const ShapeData& shapeData, bool isFree = true );
 
-        void addSimAgent( SimAgent* simAgentPtr );
+        void addSimAgent( SimAgent* simAgentPtr, tysoc::TVec3& position );
 
         /* Returns a body-wrapper of a body with a specific name in the simulation */
         SimBody* getBody( const std::string& name );

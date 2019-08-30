@@ -254,6 +254,9 @@ namespace dart
                                                                 _parentBodyNodePtr,
                                                                 _rjProperties,
                                                                 _bnProperties );
+
+            m_dartJointPtr = _joint_body_pair.first;
+            m_dartBodyNodePtr = _joint_body_pair.second;
         }
         else if ( jointData.type == eJointType::PRISMATIC )
         {
@@ -345,41 +348,66 @@ namespace dart
         m_graphicsObj = createRenderableShape( shapeData );
 
         // add the collision shape to the body node
-        m_dartShapeNodePtr = m_dartBodyNodePtr->createShapeNodeWith< dynamics::CollisionAspect, 
-                                                                     dynamics::DynamicsAspect >( m_dartShapePtr );
+        if ( m_dartShapePtr )
+        {
+            m_dartShapeNodePtr = m_dartBodyNodePtr->createShapeNodeWith< 
+                                                        dynamics::CollisionAspect, 
+                                                        dynamics::DynamicsAspect >( m_dartShapePtr );
+        }
         // m_dartShapeNodePtr->getDynamicsAspect()->setRestitutionCoeff( 0.6 );
         // m_dartShapeNodePtr->getDynamicsAspect()->setFrictionCoeff( 1.0 );
 
-        // calculate the mass to be used for this body
-        double _mass = computeMassFromShape( m_dartShapePtr );
 
-        // construct inertia properties
-        dynamics::Inertia _bnInertia;
-        _bnInertia.setMass( _mass );
         if ( m_dartShapePtr )
-            _bnInertia.setMoment( m_dartShapePtr->computeInertia( _mass ) );
-        else
-            _bnInertia.setMoment( 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001 );
+        {
+            // construct inertia properties
+            dynamics::Inertia _bnInertia;
 
-        // set the inertia again (just in case)
-        m_dartBodyNodePtr->setInertia( _bnInertia );
+            // calculate the mass to be used for this body
+            double _mass = computeMassFromShape( m_dartShapePtr );
+
+            _bnInertia.setMass( _mass );
+            _bnInertia.setMoment( m_dartShapePtr->computeInertia( _mass ) );
+
+            m_dartBodyNodePtr->setInertia( _bnInertia );
+        }
+        // else
+        // {
+        //     _bnInertia.setMass( 0.001 );
+        //     _bnInertia.setMoment( 0.000001, 0.000001, 0.000001, 0.000001, 0.000001, 0.000001 );
+        // }
     }
 
     void SimBody::update()
     {
-        if ( m_parent )
-            return; // positions should be updated by articulated system
+        if ( !m_dartShapeNodePtr )
+            return;
 
-        // convert joint rel-position (to world) into position to use
-        Eigen::Isometry3d _tf = m_dartJointPtr->getRelativeTransform();
-        m_worldPos = { _tf.translation().x(), _tf.translation().y(), _tf.translation().z() };
+        if ( !m_parent )
+        {
+            // in case of a free single body (or root) use the relative transform of the parent joint
 
-        // convert joint rel-rotation (to world) into rotation to use
-        Eigen::Quaterniond _quat( m_dartJointPtr->getRelativeTransform().rotation() );
-        m_worldRot = tysoc::TMat3::fromQuaternion( { _quat.x(), _quat.y(), _quat.z(), _quat.w() } );
+            // convert joint rel-position (to world) into position to use
+            Eigen::Isometry3d _tf = m_dartJointPtr->getRelativeTransform();
+            m_worldPos = { (float)_tf.translation().x(), (float)_tf.translation().y(), (float)_tf.translation().z() };
 
-        // update the world-transform
-        m_worldTransform = tysoc::TMat4::fromPositionAndRotation( m_worldPos, m_worldRot );
+            // convert joint rel-rotation (to world) into rotation to use
+            Eigen::Quaterniond _quat( m_dartJointPtr->getRelativeTransform().rotation() );
+            m_worldRot = tysoc::TMat3::fromQuaternion( { (float)_quat.x(), (float)_quat.y(), (float)_quat.z(), (float)_quat.w() } );
+
+            // update the world-transform
+            m_worldTransform = tysoc::TMat4::fromPositionAndRotation( m_worldPos, m_worldRot );
+        }
+        else
+        {
+            // otherwise, use the worldtransform of the bodynode
+
+            // convert world-transform of bodynode into appropriate format
+            m_worldTransform = fromEigenTransform( m_dartBodyNodePtr->getWorldTransform() );
+            // and extract both position and rotation
+            m_worldPos = m_worldTransform.getPosition();
+            m_worldRot = m_worldTransform.getRotation();
+        }
         
         if ( m_graphicsObj )
         {
@@ -689,6 +717,33 @@ namespace dart
         m_graphicsScene->addRenderable( _simBody->graphics() );
 
         return _simBody;
+    }
+
+    void ITestApplication::addSimAgent( SimAgent* simAgentPtr, tysoc::TVec3& position )
+    {
+        m_dartWorldPtr->addSkeleton( simAgentPtr->skeleton() );
+
+        m_simAgents.push_back( simAgentPtr );
+        m_simAgentsMap[ simAgentPtr->name() ] = simAgentPtr;
+
+        auto _bodies = simAgentPtr->bodies();
+        for ( size_t i = 0; i < _bodies.size(); i++ )
+        {
+            assert( _bodies[i] ); // ensure that the body exists
+
+            m_simBodies.push_back( _bodies[i] );
+            m_simBodiesMap[ _bodies[i]->name() ] = _bodies[i];
+
+            if ( _bodies[i]->graphics() )
+                m_graphicsScene->addRenderable( _bodies[i]->graphics() );
+        }
+
+        // grab root and place it in the starting position
+        auto _rootSimBodyPtr = _bodies.front();
+        auto _tf = toEigenTransform( tysoc::TMat4( position, tysoc::TMat3() ) );
+        auto _qpos0 = dynamics::FreeJoint::convertToPositions( _tf );
+
+        simAgentPtr->skeleton()->getJoint( 0 )->setPositions( _qpos0 );
     }
 
     SimBody* ITestApplication::getBody( const std::string& name )
