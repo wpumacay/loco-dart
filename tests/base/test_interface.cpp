@@ -243,12 +243,14 @@ namespace dart
         {
             // construct properties of the revolute joint
             dynamics::RevoluteJoint::Properties _rjProperties;
-            _rjProperties.mName = jointData.name;
-            _rjProperties.mAxis = toEigenVec3( jointData.axis );
-            _rjProperties.mT_ChildBodyToJoint.translation() = toEigenVec3( jointData.pos );
-            _rjProperties.mRestPositions[0] = 0.0;
-            _rjProperties.mSpringStiffnesses[0] = 0.0;
-            _rjProperties.mDampingCoefficients[0] = 0.0;
+
+            _rjProperties.mName                     = jointData.name;
+            _rjProperties.mAxis                     = toEigenVec3( jointData.axis );
+            _rjProperties.mT_ParentBodyToJoint      = toEigenTransform( jointData.tfParentBody2Joint );
+            _rjProperties.mT_ChildBodyToJoint       = toEigenTransform( jointData.tfThisBody2Joint );
+            _rjProperties.mRestPositions[0]         = 0.0;
+            _rjProperties.mSpringStiffnesses[0]     = 0.0;
+            _rjProperties.mDampingCoefficients[0]   = 0.0;
 
             auto _joint_body_pair = m_dartSkeletonPtr->createJointAndBodyNodePair<dynamics::RevoluteJoint>(
                                                                 _parentBodyNodePtr,
@@ -262,12 +264,14 @@ namespace dart
         {
             // construct properties of the prismatic joint
             dynamics::PrismaticJoint::Properties _pjProperties;
-            _pjProperties.mName = jointData.name;
-            _pjProperties.mAxis = toEigenVec3( jointData.axis );
-            _pjProperties.mT_ChildBodyToJoint.translation() = toEigenVec3( jointData.pos );
-            _pjProperties.mRestPositions[0] = 0.0;
-            _pjProperties.mSpringStiffnesses[0] = 0.0;
-            _pjProperties.mDampingCoefficients[0] = 0.0;
+
+            _pjProperties.mName                     = jointData.name;
+            _pjProperties.mAxis                     = toEigenVec3( jointData.axis );
+            _pjProperties.mT_ParentBodyToJoint      = toEigenTransform( jointData.tfParentBody2Joint );
+            _pjProperties.mT_ChildBodyToJoint       = toEigenTransform( jointData.tfThisBody2Joint );
+            _pjProperties.mRestPositions[0]         = 0.0;
+            _pjProperties.mSpringStiffnesses[0]     = 0.0;
+            _pjProperties.mDampingCoefficients[0]   = 0.0;
 
             auto _joint_body_pair = m_dartSkeletonPtr->createJointAndBodyNodePair<dynamics::PrismaticJoint>(
                                                                 _parentBodyNodePtr,
@@ -280,11 +284,13 @@ namespace dart
         {
             // construct properties of the ball|spherical joint
             dynamics::BallJoint::Properties _bjProperties;
-            _bjProperties.mName = jointData.name;
-            _bjProperties.mT_ChildBodyToJoint.translation() = toEigenVec3( jointData.pos );
-            _bjProperties.mRestPositions = Eigen::Vector3d::Constant( 0.0 );
-            _bjProperties.mSpringStiffnesses = Eigen::Vector3d( 0.0, 0.0, 0.0 );
-            _bjProperties.mDampingCoefficients = Eigen::Vector3d( 0.0, 0.0, 0.0 );
+
+            _bjProperties.mName                 = jointData.name;
+            _bjProperties.mT_ParentBodyToJoint  = toEigenTransform( jointData.tfParentBody2Joint );
+            _bjProperties.mT_ChildBodyToJoint   = toEigenTransform( jointData.tfThisBody2Joint );
+            _bjProperties.mRestPositions        = Eigen::Vector3d::Constant( 0.0 );
+            _bjProperties.mSpringStiffnesses    = Eigen::Vector3d( 0.0, 0.0, 0.0 );
+            _bjProperties.mDampingCoefficients  = Eigen::Vector3d( 0.0, 0.0, 0.0 );
 
             auto _joint_body_pair = m_dartSkeletonPtr->createJointAndBodyNodePair<dynamics::BallJoint>(
                                                                 _parentBodyNodePtr,
@@ -297,10 +303,11 @@ namespace dart
         {
             // construct properties of the planar joint
             dynamics::PlanarJoint::Properties _pjProperties;
-            _pjProperties.mName = jointData.name;
-            _pjProperties.mT_ChildBodyToJoint.translation() = toEigenVec3( jointData.pos );
+
+            _pjProperties.mName                 = jointData.name;
+            _pjProperties.mT_ParentBodyToJoint  = toEigenTransform( jointData.tfParentBody2Joint );
+            _pjProperties.mT_ChildBodyToJoint   = toEigenTransform( jointData.tfThisBody2Joint );
             _pjProperties.setZXPlane();
-            _pjProperties.mRestPositions = Eigen::Vector3d::Constant( 0.0 );
 
             auto _joint_body_pair = m_dartSkeletonPtr->createJointAndBodyNodePair<dynamics::PlanarJoint>(
                                                                 _parentBodyNodePtr,
@@ -316,8 +323,10 @@ namespace dart
                 // construct properties of the fixed|weld joint
                 dynamics::Joint::Properties _basicProperties;
                 dynamics::WeldJoint::Properties _wjProperties( _basicProperties );
-                _wjProperties.mName = jointData.name;
-                _wjProperties.mT_ChildBodyToJoint.translation() = toEigenVec3( jointData.pos );
+
+                _wjProperties.mName                 = jointData.name;
+                _wjProperties.mT_ParentBodyToJoint  = toEigenTransform( jointData.tfParentBody2Joint );
+                _wjProperties.mT_ChildBodyToJoint   = toEigenTransform( jointData.tfThisBody2Joint );
 
                 auto _joint_body_pair = m_dartSkeletonPtr->createJointAndBodyNodePair<dynamics::WeldJoint>(
                                                                     _parentBodyNodePtr,
@@ -719,7 +728,7 @@ namespace dart
         return _simBody;
     }
 
-    void ITestApplication::addSimAgent( SimAgent* simAgentPtr, tysoc::TVec3& position )
+    void ITestApplication::addSimAgent( SimAgent* simAgentPtr, tysoc::TVec3& position, tysoc::TMat3& rotation )
     {
         m_dartWorldPtr->addSkeleton( simAgentPtr->skeleton() );
 
@@ -740,10 +749,20 @@ namespace dart
 
         // grab root and place it in the starting position
         auto _rootSimBodyPtr = _bodies.front();
-        auto _tf = toEigenTransform( tysoc::TMat4( position, tysoc::TMat3() ) );
-        auto _qpos0 = dynamics::FreeJoint::convertToPositions( _tf );
 
-        simAgentPtr->skeleton()->getJoint( 0 )->setPositions( _qpos0 );
+        if ( _rootSimBodyPtr->joint()->getType() == dynamics::FreeJoint::getStaticType() )
+        {
+            auto _tf = toEigenTransform( tysoc::TMat4( position, rotation ) );
+            auto _qpos0 = dynamics::FreeJoint::convertToPositions( _tf );
+
+            simAgentPtr->skeleton()->getJoint( 0 )->setPositions( _qpos0 );
+        }
+        else if ( _rootSimBodyPtr->joint()->getType() == dynamics::PlanarJoint::getStaticType() )
+        {
+            auto _qpos0 = Eigen::Vector3d( position.z, position.x, TYSOC_PI );
+
+            simAgentPtr->skeleton()->getJoint( 0 )->setPositions( _qpos0 );
+        }
     }
 
     SimBody* ITestApplication::getBody( const std::string& name )

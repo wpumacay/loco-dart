@@ -58,10 +58,12 @@ namespace dart
     struct JointData
     {
         std::string     name;
-        tysoc::TVec3    pos;    // relative position w.r.t. parent body
-        eJointType      type;   // type of joint to be constructed
-        tysoc::TVec3    axis;   // axis of joint to be constructed
-        tysoc::TVec2    limits; // motion range (lo==hi: fixed, lo>hi: continuous, lo<hi: limited)
+        tysoc::TVec3    pos;                // relative position w.r.t. parent body
+        tysoc::TMat4    tfParentBody2Joint; // current body's parent w.r.t. this joint
+        tysoc::TMat4    tfThisBody2Joint;   // current body w.r.t. this joint
+        eJointType      type;               // type of joint to be constructed
+        tysoc::TVec3    axis;               // axis of joint to be constructed
+        tysoc::TVec2    limits;             // motion range (lo==hi: fixed, lo>hi: continuous, lo<hi: limited)
     };
 
     Eigen::Vector3d toEigenVec3( const tysoc::TVec3& vec );
@@ -132,6 +134,9 @@ namespace dart
 
         /* Returns the dart reference to the bodynode */
         dynamics::BodyNodePtr node() { return m_dartBodyNodePtr; }
+
+        /* Returns the dart reference to the jointnode */
+        dynamics::JointPtr joint() { return m_dartJointPtr; }
 
         /* Returns the world-position of the body */
         tysoc::TVec3 position() { return m_worldPos; }
@@ -255,7 +260,7 @@ namespace dart
 
         SimBody* createSingleBody( const ShapeData& shapeData, bool isFree = true );
 
-        void addSimAgent( SimAgent* simAgentPtr, tysoc::TVec3& position );
+        void addSimAgent( SimAgent* simAgentPtr, tysoc::TVec3& position, tysoc::TMat3& rotation );
 
         /* Returns a body-wrapper of a body with a specific name in the simulation */
         SimBody* getBody( const std::string& name );

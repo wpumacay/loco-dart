@@ -1,6 +1,7 @@
 
 message( "Configuring tysoc-dart::base_test_interface" )
 
+# @TODO: Change /usr/include/bullet for find_package
 include_directories( "/usr/include/bullet" )
 include_directories( "${CMAKE_SOURCE_DIR}/ext/dart" )
 include_directories( "${CMAKE_BINARY_DIR}/ext/dart" )
