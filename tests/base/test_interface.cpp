@@ -23,8 +23,6 @@ namespace dart
     {
         Eigen::Isometry3d _res;
         _res.setIdentity();
-
-        _res.translation() = toEigenVec3( transform.getPosition() );
         
         auto _rotation = _res.rotation();
         for ( size_t i = 0; i < 3; i++ )
@@ -32,6 +30,7 @@ namespace dart
                 _rotation( i, j ) = transform.get( i, j );
 
         _res.rotate( _rotation );
+        _res.translation() = toEigenVec3( transform.getPosition() );
 
         return _res;
     }
@@ -251,6 +250,9 @@ namespace dart
             _rjProperties.mRestPositions[0]         = 0.0;
             _rjProperties.mSpringStiffnesses[0]     = 0.0;
             _rjProperties.mDampingCoefficients[0]   = 0.0;
+            _rjProperties.mPositionLowerLimits[0]   = jointData.limits.x;
+            _rjProperties.mPositionUpperLimits[0]   = jointData.limits.y;
+            _rjProperties.mIsPositionLimitEnforced  = true;
 
             auto _joint_body_pair = m_dartSkeletonPtr->createJointAndBodyNodePair<dynamics::RevoluteJoint>(
                                                                 _parentBodyNodePtr,
@@ -759,7 +761,7 @@ namespace dart
         }
         else if ( _rootSimBodyPtr->joint()->getType() == dynamics::PlanarJoint::getStaticType() )
         {
-            auto _qpos0 = Eigen::Vector3d( position.z, position.x, TYSOC_PI );
+            auto _qpos0 = Eigen::Vector3d( position.z, position.x, TYSOC_PI / 90. );
 
             simAgentPtr->skeleton()->getJoint( 0 )->setPositions( _qpos0 );
         }

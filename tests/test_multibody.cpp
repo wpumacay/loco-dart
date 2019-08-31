@@ -52,7 +52,7 @@ void AppExample::_onApplicationStart()
 
     createSingleBody( _planeShapeData, false );
 
-    _createWalkerPlanar( "walker_agent", { 0.0, 0.0, 2.0 }, tysoc::TMat3::fromEuler( { 0.0, TYSOC_PI, 0.0 } ) );
+    _createWalkerPlanar( "walker_agent", { 0.0, 0.0, 2.0 }, tysoc::TMat3::fromEuler( { 0.0, 0.0, 0.0 } ) );
 }
 
 void AppExample::_createWalkerPlanar( const std::string& name,
@@ -78,7 +78,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
 
         dart::JointData _jointTorso;
         _jointTorso.name = "jnt_torso_free";
-        _jointTorso.type = dart::eJointType::FREE;
+        // _jointTorso.type = dart::eJointType::FREE;
         _jointTorso.type = dart::eJointType::PLANAR;
         _jointTorso.tfParentBody2Joint = _tfParentBody2Joint;
         _jointTorso.tfThisBody2Joint = _tfThisBody2Joint;
@@ -88,7 +88,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
 
     // base (using 3 dofs for planar)
     {
-        
+
     }
 
     // rthigh - dummy
@@ -100,7 +100,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, -0.05, 0.3 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.05, -0.3 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -108,6 +108,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         dart::JointData _joint_rthigh_revolute;
         _joint_rthigh_revolute.name = "jnt_rthigh_revolute";
         _joint_rthigh_revolute.type = dart::eJointType::REVOLUTE;
+        _joint_rthigh_revolute.limits = { -TYSOC_PI / 9., TYSOC_PI * 5. / 9. };
         _joint_rthigh_revolute.tfParentBody2Joint = _tfParentBody2Joint;
         _joint_rthigh_revolute.tfThisBody2Joint = _tfThisBody2Joint;
         _joint_rthigh_revolute.axis = { 0.0, -1.0, 0.0 };
@@ -126,7 +127,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.225 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.225 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -149,7 +150,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.225 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.225 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -157,6 +158,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         dart::JointData _joint_rleg_revolute;
         _joint_rleg_revolute.name = "jnt_rleg_revolute";
         _joint_rleg_revolute.type = dart::eJointType::REVOLUTE;
+        _joint_rleg_revolute.limits = { -TYSOC_PI * 5. / 6., 0.0 };
         _joint_rleg_revolute.tfParentBody2Joint = _tfParentBody2Joint;
         _joint_rleg_revolute.tfThisBody2Joint = _tfThisBody2Joint;
         _joint_rleg_revolute.axis = { 0.0, -1.0, 0.0 };
@@ -175,7 +177,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.25 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.25 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -198,7 +200,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.25 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.25 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -206,6 +208,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         dart::JointData _joint_rfoot_revolute;
         _joint_rfoot_revolute.name = "jnt_rfoot_revolute";
         _joint_rfoot_revolute.type = dart::eJointType::REVOLUTE;
+        _joint_rfoot_revolute.limits = { -TYSOC_PI / 4., TYSOC_PI / 4. };
         _joint_rfoot_revolute.tfParentBody2Joint = _tfParentBody2Joint;
         _joint_rfoot_revolute.tfThisBody2Joint = _tfThisBody2Joint;
         _joint_rfoot_revolute.axis = { 0.0, -1.0, 0.0 };
@@ -225,9 +228,9 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
         _tfParentBody2Joint.setPosition( { 0.06, 0.0, 0.0 } );
-        _tfParentBody2Joint.setRotation( tysoc::TMat3( 0.0, 0.0, 1.0,
+        _tfParentBody2Joint.setRotation( tysoc::TMat3( 0.0, 0.0, -1.0,
                                                        0.0, 1.0, 0.0,
-                                                      -1.0, 0.0, 0.0 ) );
+                                                       1.0, 0.0, 0.0 ) );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -250,7 +253,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.05, 0.3 } );
+        _tfParentBody2Joint.setPosition( { 0.0, -0.05, -0.3 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -258,9 +261,10 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         dart::JointData _joint_lthigh_revolute;
         _joint_lthigh_revolute.name = "jnt_lthigh_revolute";
         _joint_lthigh_revolute.type = dart::eJointType::REVOLUTE;
+        _joint_lthigh_revolute.limits = { -TYSOC_PI / 9., TYSOC_PI * 5. / 9. };
         _joint_lthigh_revolute.tfParentBody2Joint = _tfParentBody2Joint;
         _joint_lthigh_revolute.tfThisBody2Joint = _tfThisBody2Joint;
-        _joint_lthigh_revolute.axis = { 0.0, 1.0, 0.0 };
+        _joint_lthigh_revolute.axis = { 0.0, -1.0, 0.0 };
 
         _walkerAgent->addBody( "lthigh_jnt", "torso", _shape_lthigh_jnt, _joint_lthigh_revolute );
     }
@@ -276,7 +280,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.225 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.225 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -299,7 +303,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.225 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.225 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -307,9 +311,10 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         dart::JointData _joint_lleg_revolute;
         _joint_lleg_revolute.name = "jnt_lleg_revolute";
         _joint_lleg_revolute.type = dart::eJointType::REVOLUTE;
+        _joint_lleg_revolute.limits = { -TYSOC_PI * 5. / 6., 0.0 };
         _joint_lleg_revolute.tfParentBody2Joint = _tfParentBody2Joint;
         _joint_lleg_revolute.tfThisBody2Joint = _tfThisBody2Joint;
-        _joint_lleg_revolute.axis = { 0.0, 1.0, 0.0 };
+        _joint_lleg_revolute.axis = { 0.0, -1.0, 0.0 };
 
         _walkerAgent->addBody( "lleg_jnt", "lthigh", _shape_lleg_jnt, _joint_lleg_revolute );
     }
@@ -325,7 +330,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.225 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.225 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -348,7 +353,7 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         // compute the transforms required
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
-        _tfParentBody2Joint.setPosition( { 0.0, 0.0, 0.25 } );
+        _tfParentBody2Joint.setPosition( { 0.0, 0.0, -0.25 } );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
@@ -356,9 +361,10 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         dart::JointData _joint_lfoot_revolute;
         _joint_lfoot_revolute.name = "jnt_lfoot_revolute";
         _joint_lfoot_revolute.type = dart::eJointType::REVOLUTE;
+        _joint_lfoot_revolute.limits = { -TYSOC_PI / 4., TYSOC_PI / 4. };
         _joint_lfoot_revolute.tfParentBody2Joint = _tfParentBody2Joint;
         _joint_lfoot_revolute.tfThisBody2Joint = _tfThisBody2Joint;
-        _joint_lfoot_revolute.axis = { 0.0, 1.0, 0.0 };
+        _joint_lfoot_revolute.axis = { 0.0, -1.0, 0.0 };
 
         _walkerAgent->addBody( "lfoot_jnt", "lleg", _shape_lfoot_jnt, _joint_lfoot_revolute );
     }
@@ -375,9 +381,9 @@ void AppExample::_createWalkerPlanar( const std::string& name,
         auto _tfParentBody2Joint = tysoc::TMat4();
         _tfParentBody2Joint.setIdentity();
         _tfParentBody2Joint.setPosition( { 0.06, 0.0, 0.0 } );
-        _tfParentBody2Joint.setRotation( tysoc::TMat3( 0.0, 0.0, 1.0,
+        _tfParentBody2Joint.setRotation( tysoc::TMat3( 0.0, 0.0, -1.0,
                                                        0.0, 1.0, 0.0,
-                                                      -1.0, 0.0, 0.0 ) );
+                                                       1.0, 0.0, 0.0 ) );
 
         auto _tfThisBody2Joint = tysoc::TMat4();
         _tfThisBody2Joint.setIdentity();
