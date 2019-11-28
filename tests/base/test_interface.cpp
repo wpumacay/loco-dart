@@ -143,40 +143,42 @@ namespace dart
         return _res;
     }
 
-    engine::LIRenderable* createRenderableShape( const ShapeData& shapeData )
+    engine::CIRenderable* createRenderableShape( const ShapeData& shapeData )
     {
-        engine::LIRenderable* _renderablePtr = NULL;
+        engine::CIRenderable* _renderablePtr = nullptr;
 
         if ( shapeData.type == eShapeType::PLANE )
         {
-            _renderablePtr = engine::LMeshBuilder::createPlane( shapeData.size.x,
+            _renderablePtr = engine::CMeshBuilder::createPlane( shapeData.size.x,
                                                                 shapeData.size.y );
         }
         else if ( shapeData.type == eShapeType::BOX )
         {
-            _renderablePtr = engine::LMeshBuilder::createBox( shapeData.size.x,
+            _renderablePtr = engine::CMeshBuilder::createBox( shapeData.size.x,
                                                               shapeData.size.y,
                                                               shapeData.size.z );
         }
         else if ( shapeData.type == eShapeType::SPHERE )
         {
-            _renderablePtr = engine::LMeshBuilder::createSphere( shapeData.size.x );
+            _renderablePtr = engine::CMeshBuilder::createSphere( shapeData.size.x );
         }
         else if ( shapeData.type == eShapeType::CYLINDER )
         {
-            _renderablePtr = engine::LMeshBuilder::createCylinder( shapeData.size.x,
+            _renderablePtr = engine::CMeshBuilder::createCylinder( shapeData.size.x,
                                                                    shapeData.size.y );
         }
         else if ( shapeData.type == eShapeType::CAPSULE )
         {
-            _renderablePtr = engine::LMeshBuilder::createCapsule( shapeData.size.x,
+            _renderablePtr = engine::CMeshBuilder::createCapsule( shapeData.size.x,
                                                                   shapeData.size.y );
         }
 
         if ( !_renderablePtr )
-            return NULL;
+            return nullptr;
 
-        _renderablePtr->getMaterial()->setColor( { shapeData.color.x, shapeData.color.y, shapeData.color.z } );
+        _renderablePtr->material()->ambient = { shapeData.color.x, shapeData.color.y, shapeData.color.z };
+        _renderablePtr->material()->diffuse = { shapeData.color.x, shapeData.color.y, shapeData.color.z };
+        _renderablePtr->material()->specular = { shapeData.color.x, shapeData.color.y, shapeData.color.z };
 
         return _renderablePtr;
     }
@@ -199,8 +201,8 @@ namespace dart
                       dynamics::SkeletonPtr dartSkeletonPtr )
     {
         m_name = name;
-        m_parent = NULL;
-        m_graphicsObj = NULL;
+        m_parent = nullptr;
+        m_graphicsObj = nullptr;
         m_dartSkeletonPtr = dartSkeletonPtr;
     }
 
@@ -212,7 +214,7 @@ namespace dart
         m_parent = parent;
 
         dynamics::BodyNodePtr _parentBodyNodePtr;
-        _parentBodyNodePtr = ( m_parent == NULL ) ? nullptr : parent->node();
+        _parentBodyNodePtr = ( m_parent == nullptr ) ? nullptr : parent->node();
 
         // construct collision shape to be used
         m_dartShapePtr = createCollisionShape( shapeData );
@@ -422,7 +424,7 @@ namespace dart
         
         if ( m_graphicsObj )
         {
-            m_graphicsObj->pos = { m_worldPos.x, m_worldPos.y, m_worldPos.z };
+            m_graphicsObj->position = { m_worldPos.x, m_worldPos.y, m_worldPos.z };
 
             for ( size_t i = 0; i < 3; i++ )
                 for ( size_t j = 0; j < 3; j++ )
@@ -454,7 +456,7 @@ namespace dart
                                 const JointData& jointData )
     {
         SimBody* _parentSimBody = nullptr;
-        // check if the parent exists, if not, just return NULL and a ERROR msg
+        // check if the parent exists, if not, just return nullptr and a ERROR msg
         if ( m_simBodiesMap.find( parentName ) != m_simBodiesMap.end() )
             _parentSimBody = m_simBodiesMap[ parentName ];
 
@@ -482,10 +484,10 @@ namespace dart
 
     ITestApplication::ITestApplication()
     {
-        m_dartWorldPtr = NULL;
+        m_dartWorldPtr = nullptr;
 
-        m_graphicsApp = NULL;
-        m_graphicsScene = NULL;
+        m_graphicsApp = nullptr;
+        m_graphicsScene = nullptr;
 
         m_isRunning = false;
         m_isTerminated = false;
@@ -504,8 +506,8 @@ namespace dart
     #if defined(__APPLE__) || defined(_WIN32)
         delete m_graphicsApp;
     #endif
-        m_graphicsApp = NULL;
-        m_graphicsScene = NULL;
+        m_graphicsApp = nullptr;
+        m_graphicsScene = nullptr;
     }
 
     void ITestApplication::init()
@@ -526,8 +528,8 @@ namespace dart
 
     void ITestApplication::_initPhysics()
     {
-        assert( m_graphicsApp != NULL );
-        assert( m_graphicsScene != NULL );
+        assert( m_graphicsApp != nullptr );
+        assert( m_graphicsScene != nullptr );
 
         m_dartWorldPtr = dart::simulation::World::create();
         m_dartWorldPtr->getConstraintSolver()->setCollisionDetector( 
@@ -547,39 +549,86 @@ namespace dart
 
     void ITestApplication::_initGraphics()
     {
-        m_graphicsApp = engine::LApp::GetInstance();
-        m_graphicsScene = engine::LApp::GetInstance()->scene();
+        auto _windowProperties = engine::CWindowProps();
+        _windowProperties.width = 1024;
+        _windowProperties.height = 768;
+        _windowProperties.title = "resizable-application";
+        _windowProperties.clearColor = { 0.6f, 0.659f, 0.690f, 1.0f };
+        _windowProperties.resizable = true;
 
-        auto _camera = new engine::LFpsCamera( "fps",
-                                               { 1.0f, 2.0f, 1.0f },
-                                               { -2.0f, -4.0f, -2.0f },
-                                               engine::LICamera::UP_Z );
+        auto _imguiProperties = engine::CImGuiProps();
+        _imguiProperties.useDockingSpace = true;
+        _imguiProperties.useDockingSpacePassthrough = true;
+        _imguiProperties.useAutosaveLayout = false;
+        _imguiProperties.fileLayout = std::string( TYSOC_PATH_RESOURCES ) + "app_gui_layout.ini";
 
-        auto _light = new engine::LLightDirectional( { 0.8, 0.8, 0.8 }, 
-                                                     { 0.8, 0.8, 0.8 },
-                                                     { 0.3, 0.3, 0.3 }, 
-                                                     0, 
-                                                     { 0.0, 0.0, -1.0 } );
-        _light->setVirtualPosition( { 5.0, 0.0, 5.0 } );
+        m_graphicsApp = new engine::CApplication( _windowProperties, _imguiProperties );
+        m_graphicsScene = m_graphicsApp->scene();
 
-        m_graphicsScene->addCamera( _camera );
-        m_graphicsScene->addLight( _light );
+        /* create some lights for the scene ***********************************************************/
+        auto _dirlight = new engine::CDirectionalLight( "directional",
+                                                        { 0.5f, 0.5f, 0.5f },
+                                                        { 0.8f, 0.8f, 0.8f },
+                                                        { 0.8f, 0.8f, 0.8f },
+                                                        { -1.0f, -1.0f, -1.0f } );
 
-        // Initialize UI resources
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& _io = ImGui::GetIO(); (void) _io;
-    #ifdef __APPLE__
-        ImGui_ImplOpenGL3_Init( "#version 150" );
-    #else
-        ImGui_ImplOpenGL3_Init( "#version 130" );
-    #endif
-        ImGui_ImplGlfw_InitForOpenGL( m_graphicsApp->window()->getGLFWwindow(), false );
-        ImGui::StyleColorsDark();
+        m_graphicsScene->addLight( std::unique_ptr< engine::CILight >( _dirlight ) );
 
-        // disable the current camera movement and allow to use the ui
-        m_graphicsScene->getCurrentCamera()->setActiveMode( false );
-        m_graphicsApp->window()->enableCursor();
+        auto _pointlight = new engine::CPointLight( "point",
+                                                    { 0.5f, 0.5f, 0.5f },
+                                                    { 0.8f, 0.8f, 0.8f },
+                                                    { 0.8f, 0.8f, 0.8f },
+                                                    { 3.0f, 3.0f, 3.0f },
+                                                    1.0f, 0.0f, 0.0f );
+
+        m_graphicsScene->addLight( std::unique_ptr< engine::CILight >( _pointlight ) );
+        /* create some cameras for the scene **********************************************************/
+        auto _cameraProjData = engine::CCameraProjData();
+        _cameraProjData.aspect = m_graphicsApp->window()->aspect();
+        _cameraProjData.width = 10.0f * m_graphicsApp->window()->aspect();
+        _cameraProjData.height = 10.0f;
+
+        auto _orbitCamera = new engine::COrbitCamera( "orbit",
+                                                      { 3.0f, 3.0f, 3.0f },
+                                                      { 0.0f, 0.0f, 1.0f },
+                                                      engine::eAxis::Z,
+                                                      _cameraProjData,
+                                                      m_graphicsApp->window()->width(),
+                                                      m_graphicsApp->window()->height() );
+
+        m_graphicsScene->addCamera( std::unique_ptr< engine::CICamera >( _orbitCamera ) );
+
+        const float _cameraSensitivity  = 0.1f;
+        const float _cameraSpeed        = 50.0f;
+        const float _cameraMaxDelta     = 10.0f;
+        
+        auto _fpsCamera = new engine::CFpsCamera( "fps",
+                                                  { 3.0f, 3.0f, 3.0f },
+                                                  { 0.0f, 0.0f, 1.0f },
+                                                  engine::eAxis::Z,
+                                                  _cameraProjData,
+                                                  _cameraSensitivity,
+                                                  _cameraSpeed,
+                                                  _cameraMaxDelta );
+
+        m_graphicsScene->addCamera( std::unique_ptr< engine::CICamera >( _fpsCamera ) );
+        /* add some effects like fog and a skybox *****************************************************/
+
+        auto _skybox = new engine::CSkybox();
+        _skybox->setCubemap( engine::CTextureManager::GetCachedTextureCube( "cloudtop" ) );
+
+        m_graphicsScene->addSkybox( std::unique_ptr< engine::CSkybox >( _skybox ) );
+
+        /**********************************************************************************************/
+
+        m_graphicsApp->renderOptions().useSkybox = true;
+        m_graphicsApp->renderOptions().useBlending = true;
+        m_graphicsApp->renderOptions().useShadowMapping = true;
+        m_graphicsApp->renderOptions().pcfCount = 0;
+        m_graphicsApp->renderOptions().shadowMapRangeConfig.type = engine::eShadowRangeType::FIXED_USER;
+        m_graphicsApp->renderOptions().shadowMapRangeConfig.worldUp = { 0.0f, 0.0f, 1.0f };
+        m_graphicsApp->renderOptions().shadowMapRangeConfig.cameraPtr = _orbitCamera;
+        m_graphicsApp->renderOptions().shadowMapRangeConfig.dirLightPtr = _dirlight;
     }
 
     void ITestApplication::reset()
@@ -609,25 +658,25 @@ namespace dart
         // do some custom step functionality
         _stepInternal();
 
-        if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_SPACE ) )
+        if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_G ) )
         {
-            m_graphicsScene->getCurrentCamera()->setActiveMode( false );
-            m_graphicsApp->window()->enableCursor();
+            ENGINE_TRACE( "Toggling ui state" );
+            m_graphicsApp->setGuiActive( !m_graphicsApp->guiActive() );
         }
-        else if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_ENTER ) )
+        else if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_U ) )
         {
-            m_graphicsScene->getCurrentCamera()->setActiveMode( true );
-            m_graphicsApp->window()->disableCursor();
+            ENGINE_TRACE( "Toggling ui-utils state" );
+            m_graphicsApp->setGuiUtilsActive( !m_graphicsApp->guiUtilsActive() );
         }
-        else if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_ESCAPE ) )
+        else if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_ESCAPE ) )
         {
             m_isTerminated = true;
         }
-        else if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_P ) )
+        else if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_P ) )
         {
             togglePause();
         }
-        else if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_Q ) )
+        else if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_Q ) )
         {
             for ( size_t i = 0; i < m_simBodies.size(); i++ )
             {
@@ -637,33 +686,19 @@ namespace dart
                 m_simBodies[i]->print();
             }
         }
-        else if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_R ) )
+        else if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_R ) )
         {
             // reset functionality here
             std::cout << "INFO> requested reset of the simulation" << std::endl;
         }
 
-        m_graphicsApp->begin();
+        engine::CDebugDrawer::DrawLine( { 0.0f, 0.0f, 0.0f }, { 5.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
+        engine::CDebugDrawer::DrawLine( { 0.0f, 0.0f, 0.0f }, { 0.0f, 5.0f, 0.0f }, { 0.0f, 1.0f, 0.0f } );
+        engine::CDebugDrawer::DrawLine( { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 1.0f } );
+
         m_graphicsApp->update();
-
-        engine::DebugSystem::drawLine( { 0.0f, 0.0f, 0.0f }, { 5.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } );
-        engine::DebugSystem::drawLine( { 0.0f, 0.0f, 0.0f }, { 0.0f, 5.0f, 0.0f }, { 0.0f, 1.0f, 0.0f } );
-        engine::DebugSystem::drawLine( { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 5.0f }, { 0.0f, 0.0f, 1.0f } );
-        
-
-        // render the UI
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        _renderUi();
-
-        ImGui::Render();
-        int _ww, _wh;
-        glfwGetFramebufferSize( m_graphicsApp->window()->getGLFWwindow(), &_ww, &_wh );
-        glViewport( 0, 0, _ww, _wh );
-        ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
-
+        m_graphicsApp->begin();
+        m_graphicsApp->render();
         m_graphicsApp->end();
     }
 
@@ -704,7 +739,7 @@ namespace dart
         }
         
         auto _simBody = new SimBody( shapeData.name, _skeleton );
-        _simBody->build( NULL, shapeData, _jointData );
+        _simBody->build( nullptr, shapeData, _jointData );
 
         /**********  Create the qpos for the object's initial configuration ********/
         if ( isFree )
@@ -725,7 +760,7 @@ namespace dart
         m_simBodies.push_back( _simBody );
         m_simBodiesMap[ _simBody->name() ] = _simBody;
 
-        m_graphicsScene->addRenderable( _simBody->graphics() );
+        m_graphicsScene->addRenderable( std::unique_ptr< engine::CIRenderable >( _simBody->graphics() ) );
 
         return _simBody;
     }
@@ -746,7 +781,7 @@ namespace dart
             m_simBodiesMap[ _bodies[i]->name() ] = _bodies[i];
 
             if ( _bodies[i]->graphics() )
-                m_graphicsScene->addRenderable( _bodies[i]->graphics() );
+                m_graphicsScene->addRenderable( std::unique_ptr< engine::CIRenderable >(_bodies[i]->graphics() ) );
         }
 
         // grab root and place it in the starting position
@@ -773,7 +808,7 @@ namespace dart
             return m_simBodiesMap[name];
 
         std::cout << "ERROR> body with name: " << name << " not found" << std::endl;
-        return NULL;
+        return nullptr;
     }
 
 }

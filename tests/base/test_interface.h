@@ -5,15 +5,7 @@
 #include <dart/dart.hpp>
 #include <dart/collision/bullet/BulletCollisionDetector.hpp>
 // Rendering functionality from 'cat1' engine
-#include <LApp.h>
-#include <LFpsCamera.h>
-#include <LFixedCamera3d.h>
-#include <LLightDirectional.h>
-#include <LMeshBuilder.h>
-// UI functionality (from Dear ImGui)
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include <CEngine.h>
 // Base functionality (math and a few helpers) from tysoc-core
 #include <tysoc_common.h>
 #include <memory>
@@ -75,7 +67,7 @@ namespace dart
     std::vector< std::string > collectAvailableModels( const std::string& folderpath );
 
     dynamics::ShapePtr createCollisionShape( const ShapeData& shapeData );
-    engine::LIRenderable* createRenderableShape( const ShapeData& shapeData );
+    engine::CIRenderable* createRenderableShape( const ShapeData& shapeData );
 
     Eigen::Vector3d computeCOMoffset( const ShapeData& shapeData );
 
@@ -91,7 +83,7 @@ namespace dart
         tysoc::TMat3    m_worldRot;
         tysoc::TMat4    m_worldTransform;
 
-        engine::LIRenderable*   m_graphicsObj;      // reference a renderable representing the body
+        engine::CIRenderable*   m_graphicsObj;      // reference a renderable representing the body
         dynamics::ShapePtr      m_dartShapePtr;     // reference to the collision shape of this body
         dynamics::ShapeNodePtr  m_dartShapeNodePtr; // reference to the collision node of this body
         dynamics::BodyNodePtr   m_dartBodyNodePtr;  // reference to the actual bodynode resource
@@ -121,7 +113,7 @@ namespace dart
         std::string name() { return m_name; }
 
         /* Returns all meshes linked to each geometry */
-        engine::LIRenderable* graphics() { return m_graphicsObj; }
+        engine::CIRenderable* graphics() { return m_graphicsObj; }
 
         /* Resets the body to some configuration */
         void reset() {}
@@ -216,8 +208,8 @@ namespace dart
 
         std::shared_ptr<simulation::World> m_dartWorldPtr;
 
-        engine::LApp* m_graphicsApp;
-        engine::LScene* m_graphicsScene;
+        engine::CApplication* m_graphicsApp;
+        engine::CScene* m_graphicsScene;
 
         std::vector< SimBody* >             m_simBodies;
         std::map< std::string, SimBody* >   m_simBodiesMap;

@@ -139,7 +139,7 @@ void AppExample::_onApplicationStart()
 
 void AppExample::_stepInternal()
 {
-    if ( engine::InputSystem::checkSingleKeyPress( GLFW_KEY_C ) )
+    if ( engine::CInputManager::CheckSingleKeyPress( ENGINE_KEY_C ) )
     {
         std::vector< std::string > _options = { "box", "sphere", "cylinder", "capsule" };
         _createBody( _options[rand() % 4] );
