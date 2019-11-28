@@ -80,6 +80,8 @@ include_directories( "${CMAKE_SOURCE_DIR}/ext/spdlog/include" )
 # folder, or in the master's repo ext folder
 include_directories( "${CMAKE_SOURCE_DIR}/ext/dart" )
 include_directories( "${CMAKE_BINARY_DIR}/ext/dart" )
+# required for bullet-collision detector (needs bullet installed) @todo: replace properly
+include_directories( "/usr/include/bullet" )
 
 find_package( assimp REQUIRED )
 

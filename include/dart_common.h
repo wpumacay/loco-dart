@@ -2,12 +2,13 @@
 
 // dart functionality
 #include <dart/dart.hpp>
-
+#include <dart/collision/bullet/BulletCollisionDetector.hpp>
 // extra helper functionality from tysocCore
 #include <tysoc_common.h>
 #include <utils/parsers/mjcf/mjcf.h>
 #include <utils/parsers/rlsim/rlsim.h>
 #include <utils/parsers/urdf/urdf.h>
+#include <components/data.h>
 
 // some helper functions
 #include <map>
