@@ -47,7 +47,7 @@ namespace tysoc {
         /* internal dart resource for collider data (dims, type, ...) */
         dynamics::ShapePtr m_dartShapePtr;
 
-        /* internal dart resource for collider information in simuulation (friction, ...) */
+        /* internal dart resource for collider information in simulation (friction, ...) */
         dynamics::ShapeNodePtr m_dartShapeNodePtr;
 
         /* type of shape that this drawable represents */

@@ -91,7 +91,8 @@ add_library( tysocPhysicsDart SHARED
 target_link_libraries( tysocPhysicsDart
                        tysocCore
                        assimp
-                       dart )
+                       dart
+                       dart-collision-bullet )
 
 # ******************************************************************************
 

@@ -57,6 +57,11 @@ namespace tysoc
 
     bool TDartSimulation::_initializeInternal()
     {
+        /* Initialize and assemble low-level resources ********************************************/
+        for ( auto _bodyAdapter : m_bodyAdapters )
+            m_dartWorld->addSkeleton( dynamic_cast< TDartBodyAdapter* >( _bodyAdapter )->skeleton() );
+
+        /******************************************************************************************/
 
         return true;
     }
@@ -80,7 +85,12 @@ namespace tysoc
 
     void TDartSimulation::_resetInternal()
     {
-
+        // do nothing here, as call to wrappers is enough (made in base)
     }
 
+    extern "C" TISimulation* simulation_create( TScenario* scenarioPtr )
+    {
+        TYSOC_CORE_INFO( "Simulation-DART >>> creating simulation" );
+        return new TDartSimulation( scenarioPtr );
+    }
 }
