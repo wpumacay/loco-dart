@@ -12,7 +12,7 @@ std::uniform_real_distribution<double>  g_randomUniformDistribution = std::unifo
 #define NUM_SPHERES 5
 #define NUM_CYLINDERS 5
 #define NUM_CAPSULES 5
-#define NUM_MESHES 0
+#define NUM_MESHES 5
 
 tysoc::TBody* createSimpleBody( const std::string& name, 
                                 const std::string& type, 
@@ -87,11 +87,18 @@ tysoc::TBody* createSimpleBody( const std::string& name,
     _visualData.specular = { 0.7, 0.5, 0.3 };
     _visualData.shininess = 50.0f;
 
+    if ( size != tysoc::TVec3( 0.0f, 0.0f, 0.0f ) )
+    {
+        _visualData.ambient = { 0.3, 0.5, 0.7 };
+        _visualData.diffuse = { 0.3, 0.5, 0.7 };
+        _visualData.specular = { 0.3, 0.5, 0.7 };
+    }
+
     _bodyData.dyntype = tysoc::eDynamicsType::DYNAMIC;
     _bodyData.collisions.push_back( _collisionData );
     _bodyData.visuals.push_back( _visualData );
 
-    if ( size != tysoc::TVec3( 0.0f, 0.0f, 0.f ) )
+    if ( size != tysoc::TVec3( 0.0f, 0.0f, 0.0f ) )
         _bodyData.dyntype = tysoc::eDynamicsType::STATIC;
 
     // choose a random position

@@ -77,7 +77,9 @@ namespace utils {
         }
         else if ( data.type == eShapeType::MESH )
         {
-            TYSOC_CORE_ERROR( "Sorry, mesh shapes are not supported yet :(" );
+            const aiScene* _meshAssimp = dynamics::MeshShape::loadMesh( data.filename );
+            if ( _meshAssimp )
+                _colshape = new dynamics::MeshShape( toEigenVec3( data.size ), _meshAssimp );
         }
         else if ( data.type == eShapeType::ELLIPSOID )
         {
