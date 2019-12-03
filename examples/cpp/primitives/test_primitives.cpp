@@ -95,8 +95,8 @@ tysoc::TBody* createSimpleBody( const std::string& name,
     }
 
     _bodyData.dyntype = tysoc::eDynamicsType::DYNAMIC;
-    _bodyData.collisions.push_back( _collisionData );
-    _bodyData.visuals.push_back( _visualData );
+    _bodyData.collision = _collisionData;
+    _bodyData.visual = _visualData;
 
     if ( size != tysoc::TVec3( 0.0f, 0.0f, 0.0f ) )
         _bodyData.dyntype = tysoc::eDynamicsType::STATIC;

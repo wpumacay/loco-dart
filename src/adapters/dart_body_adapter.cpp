@@ -38,14 +38,14 @@ namespace tysoc {
         else
             _createJointBodyNodePair_free();
 
-        /* add collider information, and grab associated shapenode (@todo: add support for multi-colliders per body)*/
-        if ( m_bodyPtr->collisions().size() < 1 )
+        /* add collider information, and grab associated shapenode */
+        auto _collider = m_bodyPtr->collision();
+        if ( !_collider )
         {
             TYSOC_CORE_ERROR( "Dart body-adapter >>> body {0} has no colliders", m_bodyPtr->name() );
             return;
         }
 
-        auto _collider = m_bodyPtr->collisions().front();
         if ( _collider->adapter() )
         {
             auto _colliderAdapter = dynamic_cast< TDartCollisionAdapter* >( _collider->adapter() );
