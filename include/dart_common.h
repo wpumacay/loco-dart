@@ -3,6 +3,7 @@
 // dart functionality
 #include <dart/dart.hpp>
 #include <dart/collision/bullet/BulletCollisionDetector.hpp>
+#include <dart/collision/ode/OdeCollisionDetector.hpp>
 // extra helper functionality from tysocCore
 #include <tysoc_common.h>
 #include <utils/parsers/mjcf/mjcf.h>

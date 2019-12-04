@@ -95,7 +95,8 @@ target_link_libraries( tysocPhysicsDart
                        tysocCore
                        assimp
                        dart
-                       dart-collision-bullet )
+                       dart-collision-bullet
+                       dart-collision-ode )
 
 # ******************************************************************************
 
@@ -103,6 +104,6 @@ target_link_libraries( tysocPhysicsDart
 if ( TYSOCDART_IS_MASTER_PROJECT )
     # Configure examples
     add_subdirectory( examples )
-    # Configure tests
-    add_subdirectory( tests )
+    ## # Configure tests
+    ## add_subdirectory( tests )
 endif()

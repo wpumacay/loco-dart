@@ -12,7 +12,6 @@ namespace tysoc
         m_dartWorld = simulation::World::create();
         m_dartWorld->getConstraintSolver()->setCollisionDetector(
                             collision::BulletCollisionDetector::create() );
-        m_dartWorld->setTimeStep( 0.001 ); // internal timestep (finner detail), repeated n-times if required 60fps
 
         /* create required adapters from the resources in the scenario */
         _createBodyAdapters();

@@ -56,29 +56,32 @@ namespace tysoc {
                 _colliderAdapter->setShapeNode( _shapeNodePtr );
 
                 /* compute inertial properties of the body */
-                dynamics::Inertia _bnInertia;
-                if ( m_bodyPtr->data().inertialData.mass != 0.0f )
+                if ( m_bodyPtr->dyntype() == eDynamicsType::DYNAMIC )
                 {
-                    _bnInertia.setMass( m_bodyPtr->data().inertialData.mass );
-                    _bnInertia.setMoment( m_bodyPtr->data().inertialData.ixx,
-                                          m_bodyPtr->data().inertialData.iyy,
-                                          m_bodyPtr->data().inertialData.izz,
-                                          m_bodyPtr->data().inertialData.ixy,
-                                          m_bodyPtr->data().inertialData.ixz,
-                                          m_bodyPtr->data().inertialData.iyz );
+                    dynamics::Inertia _bnInertia;
+                    if ( m_bodyPtr->data().inertialData.mass != 0.0f )
+                    {
+                        _bnInertia.setMass( m_bodyPtr->data().inertialData.mass );
+                        _bnInertia.setMoment( m_bodyPtr->data().inertialData.ixx,
+                                              m_bodyPtr->data().inertialData.iyy,
+                                              m_bodyPtr->data().inertialData.izz,
+                                              m_bodyPtr->data().inertialData.ixy,
+                                              m_bodyPtr->data().inertialData.ixz,
+                                              m_bodyPtr->data().inertialData.iyz );
 
-                    // @todo: add support to recompute principal axes if local-transform given, and ...
-                    //        to set the COM of the inertial frame w.r.t. body frame
-                }
-                else
-                {
-                    auto _mass = _colliderAdapter->collisionShape()->getVolume() * _collider->data().density;
-                    auto _inertia = _colliderAdapter->collisionShape()->computeInertia( _mass );
-                    _bnInertia.setMass( _mass );
-                    _bnInertia.setMoment( _inertia );
-                }
+                        // @todo: add support to recompute principal axes if local-transform given, and ...
+                        //        to set the COM of the inertial frame w.r.t. body frame
+                    }
+                    else
+                    {
+                        auto _mass = _colliderAdapter->collisionShape()->getVolume() * _collider->data().density;
+                        auto _inertia = _colliderAdapter->collisionShape()->computeInertia( _mass );
+                        _bnInertia.setMass( _mass );
+                        _bnInertia.setMoment( _inertia );
+                    }
 
-                m_dartBodyNodePtr->setInertia( _bnInertia );
+                    m_dartBodyNodePtr->setInertia( _bnInertia );
+                }
             }
         }
         else

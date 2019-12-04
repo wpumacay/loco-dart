@@ -7,10 +7,13 @@
 echo "======== Installing apt-dependencies ============"
 
 echo "==> Installing build tools"
-sudo apt-get install make cmake pkg-config
+sudo apt-get install build-essential cmake pkg-config
 
 echo "==> Installing dependencies for renderer"
 sudo apt-get install libassimp-dev libglfw3-dev libglew-dev
+
+echo "==> Installing dependencies for dart-backend"
+sudo apt-get install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev libopenscenegraph-dev
 
 echo "======== Cloning dependencies -> ext/ ==========="
 

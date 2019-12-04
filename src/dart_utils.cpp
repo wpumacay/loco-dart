@@ -87,7 +87,21 @@ namespace utils {
         }
         else if ( data.type == eShapeType::HFIELD )
         {
-            TYSOC_CORE_ERROR( "Sorry, heightfield shapes are not suported yet :(" );
+            using Vector3 = Eigen::Matrix<float, 3, 1>;
+            //// // create the buffer for the heightfield (needs un-normalized heights) (@todo: change heightData to unnormalized)  
+            //// std::vector<float> _heightsDataUnnormalized;
+            //// for ( size_t i = 0; i < data.hdata.heightData.size(); i++ )
+            ////     _heightsDataUnnormalized.push_back( data.hdata.heightData[i] * data.size.z );
+
+            // create collision shape for the heightfield (scale sets the dimensions in width-depth)
+            _colshape = new dynamics::HeightmapShapef();
+            dynamic_cast< dynamics::HeightmapShapef* >( _colshape )->setHeightField( data.hdata.nWidthSamples,
+                                                                                     data.hdata.nDepthSamples,
+                                                                                     data.hdata.heightData );
+            auto _scale = Vector3( data.size.x / ( data.hdata.nWidthSamples - 1 ),
+                                   data.size.y / ( data.hdata.nDepthSamples - 1 ), 
+                                   data.size.z );
+            dynamic_cast< dynamics::HeightmapShapef* >( _colshape )->setScale( _scale );
         }
         else if ( data.type == eShapeType::NONE )
         {
