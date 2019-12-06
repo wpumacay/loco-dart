@@ -5,12 +5,19 @@
 #include <dart_config.h>
 #include <random>
 
-const size_t STACK_SIZE = 3;
+const size_t STACK_SIZE = 6;
 const float SPACING = 0.1f;
 const tysoc::TVec3 BODY_SIZE = { 0.1f, 0.2f, 0.3f };
 const tysoc::TVec3 EXTENTS = { (STACK_SIZE - 1) * (SPACING + BODY_SIZE.x),
                                (STACK_SIZE - 1) * (SPACING + BODY_SIZE.y),
                                (STACK_SIZE - 1) * (SPACING + BODY_SIZE.z) };
+
+std::default_random_engine                      g_randomGenerator;
+std::uniform_real_distribution<TScalar>  g_randomUniformDistribution = std::uniform_real_distribution<TScalar>( 0.5, 1.0 );
+
+// ISSUE: Pure vertical case seems to be a corner case that breaks the collision detector and solver
+const tysoc::TVec3 NOISE_POSITION = { 0.01f, 0.01f, 0.01f };
+const tysoc::TVec3 NOISE_ROTATION = { 0.01f, 0.01f, 0.01f };
 
 tysoc::TBody* createSingleBody( const std::string& name, 
                                 const tysoc::eShapeType& type,
@@ -40,16 +47,18 @@ int main()
             for ( size_t k = 0; k < STACK_SIZE; k++ )
             {
                 const std::string _bodyName = std::string( "body_" ) + std::to_string( i ) + "_" + std::to_string( j ) + "_" + std::to_string( k );
-                const tysoc::eShapeType _bodyShape = tysoc::eShapeType::BOX;
+                const tysoc::eShapeType _bodyShape = tysoc::eShapeType::SPHERE;
                 const float _posX = i * ( SPACING + BODY_SIZE.x ) - 0.5f * EXTENTS.x;
                 const float _posY = j * ( SPACING + BODY_SIZE.y ) - 0.5f * EXTENTS.y;
                 const float _posZ = k * ( SPACING + BODY_SIZE.z ) - 0.5f * EXTENTS.z + 3.0f;
-
+                const float _factor = g_randomUniformDistribution( g_randomGenerator );
+                const tysoc::TVec3 _position = { _posX + _factor * NOISE_POSITION.x, _posY + _factor * NOISE_POSITION.y, _posZ + _factor * NOISE_POSITION.z };
+                const tysoc::TMat3 _rotation = tysoc::TMat3::fromEuler( { _factor * NOISE_ROTATION.x, _factor * NOISE_ROTATION.y, _factor * NOISE_ROTATION.z } );
                 _scenario->addBody( createSingleBody( _bodyName,
                                                       _bodyShape, 
                                                       BODY_SIZE, 
-                                                      { _posX, _posY, _posZ },
-                                                      tysoc::TMat3::fromEuler( { 0.01f, 0.01f, 0.01f } ), // it seems extreme case of all vertical blows up the simulation
+                                                      _position,
+                                                      _rotation, // it seems extreme case of all vertical blows up the simulation
                                                       { 0.7f, 0.5f, 0.3f } ) );
             }
         }

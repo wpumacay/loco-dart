@@ -17,6 +17,6 @@ namespace utils {
     tysoc::TVec3 fromEigenVec3( const Eigen::Vector3d& vec );
     tysoc::TMat4 fromEigenTransform( const Eigen::Isometry3d& transform );
 
-    dynamics::ShapePtr createCollisionShape( const TShapeData& data );
+    dynamics::ShapePtr createCollisionShape( const TCollisionData& colliderData );
 
 }}

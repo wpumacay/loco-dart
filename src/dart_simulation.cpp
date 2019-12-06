@@ -12,7 +12,7 @@ namespace tysoc
         m_dartWorld = simulation::World::create();
 
         /* set collision detector (options: Bullet | ODE ) */
-        //// m_dartWorld->getConstraintSolver()->setCollisionDetector( collision::BulletCollisionDetector::create() );
+        // m_dartWorld->getConstraintSolver()->setCollisionDetector( collision::BulletCollisionDetector::create() );
         m_dartWorld->getConstraintSolver()->setCollisionDetector( collision::OdeCollisionDetector::create() ); // faster for primitives, but meshes are awfully slow (should use cvx-hull)
 
         /* set constraint solver (options: Dantzig | Dantzig + PGS(secondary) | PGS ) */
