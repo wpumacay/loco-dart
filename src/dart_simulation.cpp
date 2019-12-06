@@ -10,8 +10,17 @@ namespace tysoc
         : TISimulation( scenarioPtr )
     {
         m_dartWorld = simulation::World::create();
-        m_dartWorld->getConstraintSolver()->setCollisionDetector(
-                            collision::BulletCollisionDetector::create() );
+
+        /* set collision detector (options: Bullet | ODE ) */
+        //// m_dartWorld->getConstraintSolver()->setCollisionDetector( collision::BulletCollisionDetector::create() );
+        m_dartWorld->getConstraintSolver()->setCollisionDetector( collision::OdeCollisionDetector::create() ); // faster for primitives, but meshes are awfully slow (should use cvx-hull)
+
+        /* set constraint solver (options: Dantzig | Dantzig + PGS(secondary) | PGS ) */
+        auto _boxedLcpConstraintSolver = dynamic_cast< constraint::BoxedLcpConstraintSolver* >( m_dartWorld->getConstraintSolver() );
+        _boxedLcpConstraintSolver->setBoxedLcpSolver( std::make_shared< constraint::DantzigBoxedLcpSolver >() ); // seems faster, but breaks in some cases
+        _boxedLcpConstraintSolver->setSecondaryBoxedLcpSolver( std::make_shared< constraint::PgsBoxedLcpSolver >() );
+        //// auto _boxedLcpConstraintSolver = dynamic_cast< constraint::BoxedLcpConstraintSolver* >( m_dartWorld->getConstraintSolver() ); //  a bit more robust where dantzig fails, but still fails
+        //// _boxedLcpConstraintSolver->setBoxedLcpSolver( std::make_shared< constraint::PgsBoxedLcpSolver >() );
 
         /* create required adapters from the resources in the scenario */
         _createBodyAdapters();
