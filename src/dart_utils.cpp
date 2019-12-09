@@ -93,26 +93,26 @@ namespace utils {
             //// for ( size_t i = 0; i < colliderData.hdata.heightcolliderData.size(); i++ )
             ////     _heightsDataUnnormalized.push_back( colliderData.hdata.heightData[i] * colliderData.size.z );
 
-            auto& _hfdata = colliderData.hdata;
-            std::vector< float > _heights( _hfdata.nWidthSamples * _hfdata.nDepthSamples, 0.0f );
-            for ( int i = 0; i < _hfdata.nWidthSamples; i++ )
-            {
-                for ( int j = 0; j < _hfdata.nDepthSamples; j++ )
-                {
-                    int _pindexUserBuffer = i + j * _hfdata.nWidthSamples;
-                    int _pindexDartBuffer = j + i * _hfdata.nDepthSamples;
-                    _heights[_pindexDartBuffer] = _hfdata.heightData[_pindexUserBuffer] * colliderData.size.z;
-                }
-            }
+            //// auto& _hfdata = colliderData.hdata;
+            //// std::vector< float > _heights( _hfdata.nWidthSamples * _hfdata.nDepthSamples, 0.0f );
+            //// for ( int i = 0; i < _hfdata.nWidthSamples; i++ )
+            //// {
+            ////     for ( int j = 0; j < _hfdata.nDepthSamples; j++ )
+            ////     {
+            ////         int _pindexUserBuffer = i + j * _hfdata.nWidthSamples;
+            ////         int _pindexDartBuffer = j + i * _hfdata.nDepthSamples;
+            ////         _heights[_pindexDartBuffer] = _hfdata.heightData[_pindexUserBuffer] * colliderData.size.z;
+            ////     }
+            //// }
 
             // create collision shape for the heightfield (scale sets the dimensions in width-depth)
             _colshape = new dynamics::HeightmapShapef();
             dynamic_cast< dynamics::HeightmapShapef* >( _colshape )->setHeightField( colliderData.hdata.nWidthSamples,
                                                                                      colliderData.hdata.nDepthSamples,
-                                                                                     _heights );
+                                                                                     colliderData.hdata.heightData );
             auto _scale = Vector3( colliderData.size.x / ( colliderData.hdata.nWidthSamples - 1 ),
                                    colliderData.size.y / ( colliderData.hdata.nDepthSamples - 1 ), 
-                                   1.0 );
+                                   colliderData.size.z );
             dynamic_cast< dynamics::HeightmapShapef* >( _colshape )->setScale( _scale );
         }
         else if ( colliderData.type == eShapeType::NONE )
