@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 
-echo "==> Installing dependencies for dart-backend"
-sudo apt-get install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev libopenscenegraph-dev
+GIT_DEPS_REPO=(tiny_math pybind11 imgui spdlog tiny_renderer tysoc googletest dart)
+GIT_DEPS_USER=(wpumacay RobotLocomotion wpumacay gabime wpumacay wpumacay google wpumacay)
+GIT_DEPS_BRANCH=(master drake docking v1.x master master master master)
+GIT_DEPS_DEST=(ext/tiny_math ext/pybind11 ext/imgui ext/spdlog ext/tiny_renderer core ext/googletest ext/dart)
 
-GIT_DEPS_REPO=(tiny_math pybind11 imgui spdlog tiny_renderer tysoc dart)
-GIT_DEPS_USER=(wpumacay pybind wpumacay gabime wpumacay wpumacay wpumacay)
-GIT_DEPS_BRANCH=(tysoc-stable master docking v1.x tysoc-stable master master)
-GIT_DEPS_DEST=(ext/tiny_math ext/pybind11 ext/imgui ext/spdlog ext/tiny_renderer core ext/dart)
-
-for i in {0..6}
+for i in {0..7}
 do
     USER=${GIT_DEPS_USER[$i]}
     REPO=${GIT_DEPS_REPO[$i]}
