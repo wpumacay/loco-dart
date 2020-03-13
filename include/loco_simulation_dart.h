@@ -3,6 +3,9 @@
 #include <loco_common_dart.h>
 #include <loco_simulation.h>
 
+#include <adapters/loco_collision_adapter_dart.h>
+#include <adapters/loco_single_body_adapter_dart.h>
+
 namespace loco {
 namespace dartsim {
 
@@ -29,6 +32,13 @@ namespace dartsim {
         void _PostStepInternal() override;
 
         void _ResetInternal() override;
+
+    private :
+
+        void _CreateSingleBodyAdapters();
+        //// void _CreateCompoundAdapters();
+        //// void _CreateKintreeAdapters();
+        //// void _CreateTerrainGeneratorAdapters();
 
     private :
 

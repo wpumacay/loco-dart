@@ -25,12 +25,38 @@ namespace dartsim {
         // PROJ.-GAUSS-SEIDEL constraint-solver: More robust where dantzig fails, but still fails in some cases (@todo: test+document failure cases)
         //// boxed_lcp_constraint_solver->setBoxedLcpSolver( std::make_shared<dart::constraint::PgsBoxedLcpSolver>() );
 
+        _CreateSingleBodyAdapters();
+        //// _CreateCompoundAdapters();
+        //// _CreateKintreeAdapters();
+        //// _CreateTerrainGeneratorAdapters();
+
     #if defined( LOCO_CORE_USE_TRACK_ALLOCS )
         if ( TLogger::IsActive() )
             LOCO_CORE_TRACE( "Loco::Allocs: Created TDartSimulation @ {0}", loco::PointerToHexAddress( this ) );
         else
             std::cout << "Loco::Allocs: Created TDartSimulation @ " << loco::PointerToHexAddress( this ) << std::endl;
     #endif
+    }
+
+    void TDartSimulation::_CreateSingleBodyAdapters()
+    {
+        auto single_bodies = m_scenarioRef->GetSingleBodiesList();
+        for ( auto single_body : single_bodies )
+        {
+            auto single_body_adapter = std::make_unique<TDartSingleBodyAdapter>( single_body );
+            single_body_adapter->SetDartWorld( m_dartWorld.get() );
+            single_body->SetAdapter( single_body_adapter.get() );
+            m_singleBodyAdapters.push_back( std::move( single_body_adapter ) );
+
+            auto collider = single_body->collision();
+            LOCO_CORE_ASSERT( collider, "TDartSimulation::_CreateSingleBodyAdapters >>> single-body {0} \
+                              must have an associated collider", single_body->name() );
+
+            auto collider_adapter = std::make_unique<TDartCollisionAdapter>( collider );
+            collider_adapter->SetDartWorld( m_dartWorld.get() );
+            collider->SetAdapter( collider_adapter.get() );
+            m_collisionAdapters.push_back( std::move( collider_adapter ) );
+        }
     }
 
     TDartSimulation::~TDartSimulation()

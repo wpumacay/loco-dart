@@ -42,9 +42,9 @@ namespace dartsim {
 
         void ChangeCollisionMask( int collisionMask ) override;
 
-        void SetDartShapeNode( dart::dynamics::ShapeNode* shape_node_ref );
+        void SetDartShapeNode( dart::dynamics::ShapeNode* shape_node_ref ) { m_DartShapeNodeRef = shape_node_ref; }
 
-        void SetDartWorld( dart::simulation::World* world_ref );
+        void SetDartWorld( dart::simulation::World* world_ref ) { m_DartWorldRef = world_ref; }
 
         dart::dynamics::ShapePtr& collision_shape() { return m_DartShape; }
 

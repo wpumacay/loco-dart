@@ -34,6 +34,20 @@ namespace dartsim {
         return eig_mat;
     }
 
+    Eigen::Isometry3d mat4_to_eigen_tf( const TMat4& mat )
+    {
+        Eigen::Isometry3d tf( Eigen::Isometry3d::Identity() );
+        Eigen::Vector3d translation = vec3_to_eigen( mat.col( 3 ) );
+        Eigen::Matrix3d rotation;
+        for ( ssize_t i = 0; i < 3; i++ )
+            for ( ssize_t j = 0; j < 3; j++ )
+                rotation( i, j ) = mat( i, j );
+
+        tf.rotate( rotation );
+        tf.translation() = translation;
+        return tf;
+    }
+
     TVec3 vec3_from_eigen( const Eigen::Vector3d& vec )
     {
         return TVec3( vec.x(), vec.y(), vec.z() );
@@ -64,12 +78,23 @@ namespace dartsim {
         return tm_mat;
     }
 
+    TMat4 mat4_from_eigen_tf( const Eigen::Isometry3d& tf )
+    {
+        TMat4 tm_mat;
+        tm_mat.set( vec3_from_eigen( tf.translation() ), 3 );
+        auto& rotation = tf.rotation();
+        for ( ssize_t i = 0; i < 3; i++ )
+            for ( ssize_t j = 0; j < 3; j++ )
+                tm_mat( i, j ) = rotation( i, j );
+        return tm_mat;
+    }
+
     dart::dynamics::ShapePtr CreateCollisionShape( const TShapeData& data )
     {
         switch ( data.type )
         {
             case eShapeType::PLANE :
-                return std::make_shared<dart::dynamics::PlaneShape>( Eigen::Vector3d::UnitZ(), 0.0 );
+                return std::make_shared<dart::dynamics::BoxShape>( vec3_to_eigen( { data.size.x(), data.size.y(), 0.01 } ) );
             case eShapeType::BOX :
                 return std::make_shared<dart::dynamics::BoxShape>( vec3_to_eigen( data.size ) );
             case eShapeType::SPHERE :

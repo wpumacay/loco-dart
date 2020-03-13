@@ -92,7 +92,8 @@ find_package( assimp REQUIRED )
 set( LOCO_DART_SRCS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/loco_common_dart.cpp"
      "${CMAKE_CURRENT_SOURCE_DIR}/src/loco_simulation_dart.cpp"
-     "${CMAKE_CURRENT_SOURCE_DIR}/src/adapters/loco_collision_adapter_dart.cpp" )
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/adapters/loco_collision_adapter_dart.cpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/adapters/loco_single_body_adapter_dart.cpp" )
 
 set( LOCO_DART_INCLUDE_DIRS
      "${CMAKE_CURRENT_SOURCE_DIR}/include"
