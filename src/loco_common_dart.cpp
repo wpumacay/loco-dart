@@ -64,4 +64,66 @@ namespace dartsim {
         return tm_mat;
     }
 
+    dart::dynamics::ShapePtr CreateCollisionShape( const TShapeData& data )
+    {
+        switch ( data.type )
+        {
+            case eShapeType::PLANE :
+                return std::make_shared<dart::dynamics::PlaneShape>( Eigen::Vector3d::UnitZ(), 0.0 );
+            case eShapeType::BOX :
+                return std::make_shared<dart::dynamics::BoxShape>( vec3_to_eigen( data.size ) );
+            case eShapeType::SPHERE :
+                return std::make_shared<dart::dynamics::SphereShape>( data.size.x() );
+            case eShapeType::CYLINDER :
+                return std::make_shared<dart::dynamics::CylinderShape>( data.size.x(), data.size.y() );
+            case eShapeType::CAPSULE :
+                return std::make_shared<dart::dynamics::CapsuleShape>( data.size.x(), data.size.y() );
+            case eShapeType::ELLIPSOID :
+                return std::make_shared<dart::dynamics::EllipsoidShape>( 2.0 * vec3_to_eigen( data.size ) );
+            case eShapeType::MESH :
+            {
+                const auto& mesh_data = data.mesh_data;
+                if ( mesh_data.filename != "" )
+                {
+                    if ( const auto assimp_scene = dart::dynamics::MeshShape::loadMesh( mesh_data.filename ) )
+                        return std::make_shared<dart::dynamics::MeshShape>( vec3_to_eigen( data.size ), assimp_scene );
+                }
+                else if ( mesh_data.vertices.size() > 0 )
+                {
+                    if ( const auto assimp_scene = CreateAssimpSceneFromVertexData( mesh_data ) )
+                        return std::make_shared<dart::dynamics::MeshShape>( vec3_to_eigen( data.size ), assimp_scene );
+                }
+
+                LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart mesh-shape" );
+                return nullptr;
+            }
+            case eShapeType::HFIELD :
+            {
+                const auto& hfield_data = data.hfield_data;
+                const ssize_t num_width_samples = hfield_data.nWidthSamples;
+                const ssize_t num_depth_samples = hfield_data.nDepthSamples;
+                const auto& heights = hfield_data.heights;
+                const float scale_x = data.size.x() / ( num_width_samples - 1 );
+                const float scale_y = data.size.y() / ( num_depth_samples - 1 );
+                const float scale_z = data.size.z();
+
+                auto hfield_shape = std::make_shared<dart::dynamics::HeightmapShapef>();
+                hfield_shape->setHeightField( num_width_samples, num_depth_samples, heights );
+                hfield_shape->setScale( Eigen::Vector3f( scale_x, scale_y, scale_z ) );
+                return hfield_shape;
+            }
+        }
+
+        LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart coll-shape" );
+        return nullptr;
+    }
+
+    const aiScene* CreateAssimpSceneFromVertexData( const TMeshData& mesh_data )
+    {
+        // @todo: implement me
+        return nullptr;
+    }
+
+
+
 }}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <loco_common.h>
+#include <components/loco_data.h>
 // Main Dart-API
 #include <dart/dart.hpp>
 #include <dart/collision/bullet/BulletCollisionDetector.hpp>
@@ -19,4 +20,9 @@ namespace dartsim {
     TMat3 mat3_from_eigen( const Eigen::Matrix3d& mat );
     TMat4 mat4_from_eigen( const Eigen::Matrix4d& mat );
 
+    // Creates a dart collision-shape from given user-data
+    dart::dynamics::ShapePtr CreateCollisionShape( const TShapeData& data );
+
+    // Creates an assimp-scene object from given user data
+    const aiScene* CreateAssimpSceneFromVertexData( const TMeshData& mesh_data );
 }}
