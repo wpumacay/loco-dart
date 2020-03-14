@@ -6,6 +6,8 @@
 namespace loco {
 namespace dartsim {
 
+    const float LOCO_DART_HFIELD_BASE = 1.0f;
+
     class TDartCollisionAdapter : public TICollisionAdapter
     {
     public :
