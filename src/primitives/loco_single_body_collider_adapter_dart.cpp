@@ -1,78 +1,52 @@
 
-#include <adapters/loco_collision_adapter_dart.h>
+#include <primitives/loco_single_body_collider_adapter_dart.h>
 
 namespace loco {
 namespace dartsim {
 
-    TDartCollisionAdapter::TDartCollisionAdapter( TCollision* collisionRef )
-        : TICollisionAdapter( collisionRef )
+    TDartSingleBodyColliderAdapter::TDartSingleBodyColliderAdapter( TSingleBodyCollider* collision_ref )
+        : TISingleBodyColliderAdapter( collision_ref )
     {
         m_DartShape = nullptr;
         m_DartShapeNodeRef = nullptr;
         m_DartWorldRef = nullptr;
     }
 
-    TDartCollisionAdapter::~TDartCollisionAdapter()
+    TDartSingleBodyColliderAdapter::~TDartSingleBodyColliderAdapter()
     {
+        if ( m_ColliderRef )
+            m_ColliderRef->DetachSim();
+        m_ColliderRef = nullptr;
+
         m_DartShape = nullptr;
         m_DartShapeNodeRef = nullptr;
         m_DartWorldRef = nullptr;
     }
 
-    void TDartCollisionAdapter::Build()
+    void TDartSingleBodyColliderAdapter::Build()
     {
-        m_DartShape = CreateCollisionShape( m_collisionRef->data() );
+        m_DartShape = CreateCollisionShape( m_ColliderRef->data() );
         m_DartShapeNodeRef = nullptr;
         m_DartWorldRef = nullptr;
     }
 
-    void TDartCollisionAdapter::Initialize()
+    void TDartSingleBodyColliderAdapter::Initialize()
     {
-
+        // Nothing extra to setup here
     }
 
-    void TDartCollisionAdapter::PreStep()
+    void TDartSingleBodyColliderAdapter::OnDetach()
     {
-        // Nothing to prepare before to a simulation step
+        m_Detached = true;
+        m_ColliderRef = nullptr;
     }
 
-    void TDartCollisionAdapter::PostStep()
-    {
-        // Nothing to process after to a simulation step
-    }
-
-    void TDartCollisionAdapter::Reset()
-    {
-        // Nothing to reset in the backend
-    }
-
-    void TDartCollisionAdapter::SetLocalPosition( const TVec3& position )
-    {
-        // @todo: Remove from API (single-bodies->single-collider), as this (and other) backend do not
-        //        support compounds. Instead, should use TCompounds and TKinematicTrees for the desired
-        //        behaviour, by using fixed joints to have links with single-colliders emulate multiple colliders
-    }
-
-    void TDartCollisionAdapter::SetLocalRotation( const TMat3& rotation )
-    {
-        // @todo: Remove from API (single-bodies->single-collider), as this (and other) backend do not
-        //        support compounds. Instead, should use TCompounds and TKinematicTrees for the desired
-        //        behaviour, by using fixed joints to have links with single-colliders emulate multiple colliders
-    }
-
-    void TDartCollisionAdapter::SetLocalTransform( const TMat4& transform )
-    {
-        // @todo: Remove from API (single-bodies->single-collider), as this (and other) backend do not
-        //        support compounds. Instead, should use TCompounds and TKinematicTrees for the desired
-        //        behaviour, by using fixed joints to have links with single-colliders emulate multiple colliders
-    }
-
-    void TDartCollisionAdapter::ChangeSize( const TVec3& new_size )
+    void TDartSingleBodyColliderAdapter::ChangeSize( const TVec3& new_size )
     {
         if ( !m_DartShape )
             return;
 
-        switch ( m_collisionRef->shape() )
+        switch ( m_ColliderRef->shape() )
         {
             case eShapeType::BOX :
             {
@@ -120,7 +94,7 @@ namespace dartsim {
             {
                 if ( auto hfield_shape = dynamic_cast<dart::dynamics::HeightmapShapef*>( m_DartShape.get() ) )
                 {
-                    const auto& hfield_data = m_collisionRef->data().hfield_data;
+                    const auto& hfield_data = m_ColliderRef->data().hfield_data;
                     const ssize_t num_width_samples = hfield_data.nWidthSamples;
                     const ssize_t num_depth_samples = hfield_data.nDepthSamples;
                     const float scale_x = new_size.x() / ( num_width_samples - 1 );
@@ -133,18 +107,18 @@ namespace dartsim {
         }
     }
 
-    void TDartCollisionAdapter::ChangeElevationData( const std::vector<float>& heights )
+    void TDartSingleBodyColliderAdapter::ChangeElevationData( const std::vector<float>& heights )
     {
         if ( !m_DartShape )
             return;
 
-        const ssize_t num_width_samples = m_collisionRef->data().hfield_data.nWidthSamples;
-        const ssize_t num_depth_samples = m_collisionRef->data().hfield_data.nDepthSamples;
+        const ssize_t num_width_samples = m_ColliderRef->data().hfield_data.nWidthSamples;
+        const ssize_t num_depth_samples = m_ColliderRef->data().hfield_data.nDepthSamples;
         const ssize_t num_total_samples = num_width_samples * num_depth_samples;
         if ( num_depth_samples != heights.size() )
         {
-            LOCO_CORE_WARN( "TDartCollisionAdapter::ChangeElevationData >>> heights-data mismatch for \
-                              collider {0}", m_collisionRef->name() );
+            LOCO_CORE_WARN( "TDartSingleBodyColliderAdapter::ChangeElevationData >>> heights-data mismatch for \
+                              collider {0}", m_ColliderRef->name() );
             LOCO_CORE_WARN( "\tndepth-samples       : {0}", num_width_samples );
             LOCO_CORE_WARN( "\tnwidth-samples       : {0}", num_depth_samples );
             LOCO_CORE_WARN( "\texpected buffer-size : {0}", num_total_samples );
@@ -156,32 +130,32 @@ namespace dartsim {
             hfield_shape->setHeightField( num_width_samples, num_depth_samples, heights );
     }
 
-    void TDartCollisionAdapter::ChangeCollisionGroup( int collisionGroup )
+    void TDartSingleBodyColliderAdapter::ChangeCollisionGroup( int collisionGroup )
     {
         if ( !m_DartWorldRef )
         {
-            LOCO_CORE_ERROR( "TDartCollisionAdapter::ChangeCollisionGroup >>> collider {0} doesn't have \
-                              a handle to the dart-world to filter collisions accordingly", m_collisionRef->name() );
+            LOCO_CORE_ERROR( "TDartSingleBodyColliderAdapter::ChangeCollisionGroup >>> collider {0} doesn't have \
+                              a handle to the dart-world to filter collisions accordingly", m_ColliderRef->name() );
             return;
         }
 
         // @todo: Must extend Dart functionality to allow collision-groups and collision-masks, as
         //        in bullet, mujoco, and raisim. So far, it seems only single exclusions are possible.
-        LOCO_CORE_WARN( "TDartCollisionAdapter::ChangeCollisionGroup >>> feature not supported yet" );
+        LOCO_CORE_WARN( "TDartSingleBodyColliderAdapter::ChangeCollisionGroup >>> feature not supported yet" );
     }
 
-    void TDartCollisionAdapter::ChangeCollisionMask( int collisionMask )
+    void TDartSingleBodyColliderAdapter::ChangeCollisionMask( int collisionMask )
     {
         if ( !m_DartWorldRef )
         {
-            LOCO_CORE_ERROR( "TDartCollisionAdapter::ChangeCollisionMask >>> collider {0} doesn't have \
-                              a handle to the dart-world to filter collisions accordingly", m_collisionRef->name() );
+            LOCO_CORE_ERROR( "TDartSingleBodyColliderAdapter::ChangeCollisionMask >>> collider {0} doesn't have \
+                              a handle to the dart-world to filter collisions accordingly", m_ColliderRef->name() );
             return;
         }
 
         // @todo: Must extend Dart functionality to allow collision-groups and collision-masks, as
         //        in bullet, mujoco, and raisim. So far, it seems only single exclusions are possible.
-        LOCO_CORE_WARN( "TDartCollisionAdapter::ChangeCollisionMask >>> feature not supported yet" );
+        LOCO_CORE_WARN( "TDartSingleBodyColliderAdapter::ChangeCollisionMask >>> feature not supported yet" );
     }
 
 }}

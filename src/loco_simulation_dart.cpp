@@ -45,16 +45,16 @@ namespace dartsim {
         {
             auto single_body_adapter = std::make_unique<TDartSingleBodyAdapter>( single_body );
             single_body_adapter->SetDartWorld( m_dartWorld.get() );
-            single_body->SetAdapter( single_body_adapter.get() );
+            single_body->SetBodyAdapter( single_body_adapter.get() );
             m_singleBodyAdapters.push_back( std::move( single_body_adapter ) );
 
-            auto collider = single_body->collision();
+            auto collider = single_body->collider();
             LOCO_CORE_ASSERT( collider, "TDartSimulation::_CreateSingleBodyAdapters >>> single-body {0} \
                               must have an associated collider", single_body->name() );
 
-            auto collider_adapter = std::make_unique<TDartCollisionAdapter>( collider );
+            auto collider_adapter = std::make_unique<TDartSingleBodyColliderAdapter>( collider );
             collider_adapter->SetDartWorld( m_dartWorld.get() );
-            collider->SetAdapter( collider_adapter.get() );
+            collider->SetColliderAdapter( collider_adapter.get() );
             m_collisionAdapters.push_back( std::move( collider_adapter ) );
         }
     }

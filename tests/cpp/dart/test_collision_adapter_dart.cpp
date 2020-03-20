@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <loco_simulation_dart.h>
-#include <adapters/loco_collision_adapter_dart.h>
+#include <primitives/loco_single_body_collider_adapter_dart.h>
 
 bool allclose_vec3( const Eigen::Vector3d& eig_vec_1, const Eigen::Vector3d& eig_vec_2, double tolerance = 1e-5 )
 {
@@ -71,13 +71,13 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterBuild )
         col_data.size = vec_col_sizes[i];
         vec_col_data.push_back( col_data );
     }
-    std::vector<std::unique_ptr<loco::TCollision>> vec_colliders;
-    std::vector<std::unique_ptr<loco::dartsim::TDartCollisionAdapter>> vec_colliders_adapters;
+    std::vector<std::unique_ptr<loco::TSingleBodyCollider>> vec_colliders;
+    std::vector<std::unique_ptr<loco::dartsim::TDartSingleBodyColliderAdapter>> vec_colliders_adapters;
     for ( size_t i = 0; i < vec_col_data.size(); i++ )
     {
         const auto collider_name = loco::ToString( vec_col_data[i].type ) + "_collider";
-        auto col_obj = std::make_unique<loco::TCollision>( collider_name, vec_col_data[i] );
-        auto col_adapter = std::make_unique<loco::dartsim::TDartCollisionAdapter>( col_obj.get() );
+        auto col_obj = std::make_unique<loco::TSingleBodyCollider>( collider_name, vec_col_data[i] );
+        auto col_adapter = std::make_unique<loco::dartsim::TDartSingleBodyColliderAdapter>( col_obj.get() );
         col_adapter->Build();
         ASSERT_TRUE( col_adapter->collision_shape() != nullptr );
         vec_colliders.push_back( std::move( col_obj ) );
@@ -145,8 +145,8 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterMeshBuild )
     col_data.mesh_data.filename = loco::PATH_RESOURCES + "meshes/monkey.stl";
 
     const auto collider_name = loco::ToString( col_data.type ) + "_collider";
-    auto col_obj = std::make_unique<loco::TCollision>( collider_name, col_data );
-    auto col_adapter = std::make_unique<loco::dartsim::TDartCollisionAdapter>( col_obj.get() );
+    auto col_obj = std::make_unique<loco::TSingleBodyCollider>( collider_name, col_data );
+    auto col_adapter = std::make_unique<loco::dartsim::TDartSingleBodyColliderAdapter>( col_obj.get() );
     col_adapter->Build();
     auto& dart_collision_shape = col_adapter->collision_shape();
     ASSERT_TRUE( dart_collision_shape != nullptr );
@@ -169,8 +169,8 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterMeshUserBuild )
     col_data.mesh_data.faces = vertices_faces.second;
 
     const auto collider_name = loco::ToString( col_data.type ) + "_collider";
-    auto col_obj = std::make_unique<loco::TCollision>( collider_name, col_data );
-    auto col_adapter = std::make_unique<loco::dartsim::TDartCollisionAdapter>( col_obj.get() );
+    auto col_obj = std::make_unique<loco::TSingleBodyCollider>( collider_name, col_data );
+    auto col_adapter = std::make_unique<loco::dartsim::TDartSingleBodyColliderAdapter>( col_obj.get() );
     col_adapter->Build();
     auto& dart_collision_shape = col_adapter->collision_shape();
     ASSERT_TRUE( dart_collision_shape != nullptr );
@@ -199,8 +199,8 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterHfieldBuild )
                                         loco::dartsim::LOCO_DART_HFIELD_BASE };
 
     const auto collider_name = loco::ToString( col_data.type ) + "_collider";
-    auto col_obj = std::make_unique<loco::TCollision>( collider_name, col_data );
-    auto col_adapter = std::make_unique<loco::dartsim::TDartCollisionAdapter>( col_obj.get() );
+    auto col_obj = std::make_unique<loco::TSingleBodyCollider>( collider_name, col_data );
+    auto col_adapter = std::make_unique<loco::dartsim::TDartSingleBodyColliderAdapter>( col_obj.get() );
     col_adapter->Build();
     auto& dart_collision_shape = col_adapter->collision_shape();
     ASSERT_TRUE( dart_collision_shape != nullptr );

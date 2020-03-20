@@ -3,13 +3,13 @@
 #include <gtest/gtest.h>
 
 #include <loco_simulation_dart.h>
-#include <adapters/loco_single_body_adapter_dart.h>
+#include <primitives/loco_single_body_adapter_dart.h>
 
 struct BuildGroup
 {
     std::unique_ptr<loco::TSingleBody> body;
     std::unique_ptr<loco::dartsim::TDartSingleBodyAdapter> body_adapter;
-    std::unique_ptr<loco::dartsim::TDartCollisionAdapter> collision_adapter;
+    std::unique_ptr<loco::dartsim::TDartSingleBodyColliderAdapter> collision_adapter;
 };
 
 BuildGroup build_body( const std::string& name,
@@ -37,9 +37,9 @@ BuildGroup build_body( const std::string& name,
 
     auto body_obj = std::make_unique<loco::TSingleBody>( name, body_data, position, tinymath::rotation( roteuler ) );
     auto body_adapter = std::make_unique<loco::dartsim::TDartSingleBodyAdapter>( body_obj.get() );
-    auto collision_ref = body_obj->collision();
-    auto collision_adapter = std::make_unique<loco::dartsim::TDartCollisionAdapter>( collision_ref );
-    collision_ref->SetAdapter( collision_adapter.get() );
+    auto collision_ref = body_obj->collider();
+    auto collision_adapter = std::make_unique<loco::dartsim::TDartSingleBodyColliderAdapter>( collision_ref );
+    collision_ref->SetColliderAdapter( collision_adapter.get() );
     body_adapter->Build();
 
     return { std::move( body_obj ), std::move( body_adapter ), std::move( collision_adapter ) };

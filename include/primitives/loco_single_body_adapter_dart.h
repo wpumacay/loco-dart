@@ -1,21 +1,21 @@
 #pragma once
 
 #include <loco_common_dart.h>
-#include <adapters/loco_body_adapter.h>
-#include <adapters/loco_collision_adapter_dart.h>
+#include <primitives/loco_single_body_collider_adapter_dart.h>
+#include <primitives/loco_single_body_adapter.h>
 
 namespace loco {
-    class TIBody;
+    class TSingleBody;
 }
 
 namespace loco {
 namespace dartsim {
 
-    class TDartSingleBodyAdapter : public TIBodyAdapter
+    class TDartSingleBodyAdapter : public TISingleBodyAdapter
     {
     public :
 
-        TDartSingleBodyAdapter( TIBody* body_ref );
+        TDartSingleBodyAdapter( TSingleBody* body_ref );
 
         TDartSingleBodyAdapter( const TDartSingleBodyAdapter& other ) = delete;
 
@@ -27,47 +27,25 @@ namespace dartsim {
 
         void Initialize() override;
 
-        void PreStep() override;
-
-        void PostStep() override;
-
         void Reset() override;
 
-        void SetPosition( const TVec3& position ) override;
-
-        void SetRotation( const TMat3& rotation ) override;
+        void OnDetach() override;
 
         void SetTransform( const TMat4& transform ) override;
 
-        void GetPosition( TVec3& dstPosition ) override;
+        void SetLinearVelocity( const TVec3& linear_vel ) override;
 
-        void GetRotation( TMat3& dstRotation ) override;
+        void SetAngularVelocity( const TVec3& angular_vel ) override;
 
-        void GetTransform( TMat4& dstTransform ) override;
+        void SetForceCOM( const TVec3& force_com ) override;
 
-        void SetInitialPosition( const TVec3& position ) override;
+        void SetTorqueCOM( const TVec3& torque_com ) override;
 
-        void SetInitialRotation( const TMat3& rotation ) override;
+        void GetTransform( TMat4& dst_transform ) override;
 
-        void SetInitialTransform( const TMat4& transform ) override;
+        void GetLinearVelocity( TVec3& dst_linear_vel ) override;
 
-        void SetLocalPosition( const TVec3& position ) override;
-
-        void SetLocalRotation( const TMat3& rotation ) override;
-
-        void SetLocalTransform( const TMat4& transform ) override;
-
-        void GetLocalPosition( TVec3& position ) override;
-
-        void GetLocalRotation( TMat3& rotation ) override;
-
-        void GetLocalTransform( TMat4& transform ) override;
-
-        void SetInitialLocalPosition( const TVec3& position ) override;
-
-        void SetInitialLocalRotation( const TMat3& rotation ) override;
-
-        void SetInitialLocalTransform( const TMat4& transform ) override;
+        void GetAngularVelocity( TVec3& dst_angular_vel ) override;
 
         void SetDartWorld( dart::simulation::World* world_ref ) { m_DartWorldRef = world_ref; }
 
@@ -82,12 +60,6 @@ namespace dartsim {
         dart::dynamics::Joint* joint() { return m_DartJointRef; }
 
         const dart::dynamics::Joint* joint() const { return m_DartJointRef; }
-
-    private :
-
-        void _SetLinearVelocity( const TVec3& linear_vel );
-
-        void _SetAngularVelocity( const TVec3& angular_vel );
 
     private :
 

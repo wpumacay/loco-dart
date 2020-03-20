@@ -1,40 +1,30 @@
 #pragma once
 
 #include <loco_common_dart.h>
-#include <adapters/loco_collision_adapter.h>
+#include <primitives/loco_single_body_collider_adapter.h>
 
 namespace loco {
 namespace dartsim {
 
     const float LOCO_DART_HFIELD_BASE = 1.0f;
 
-    class TDartCollisionAdapter : public TICollisionAdapter
+    class TDartSingleBodyColliderAdapter : public TISingleBodyColliderAdapter
     {
     public :
 
-        TDartCollisionAdapter( TCollision* collisionRef );
+        TDartSingleBodyColliderAdapter( TSingleBodyCollider* collision_ref );
 
-        TDartCollisionAdapter( const TDartCollisionAdapter& other ) = delete;
+        TDartSingleBodyColliderAdapter( const TDartSingleBodyColliderAdapter& other ) = delete;
 
-        TDartCollisionAdapter& operator=( const TDartCollisionAdapter& other ) = delete;
+        TDartSingleBodyColliderAdapter& operator=( const TDartSingleBodyColliderAdapter& other ) = delete;
 
-        ~TDartCollisionAdapter();
+        ~TDartSingleBodyColliderAdapter();
 
         void Build() override;
 
         void Initialize() override;
 
-        void PreStep() override;
-
-        void PostStep() override;
-
-        void Reset() override;
-
-        void SetLocalPosition( const TVec3& position ) override;
-
-        void SetLocalRotation( const TMat3& rotation ) override;
-
-        void SetLocalTransform( const TMat4& transform ) override;
+        void OnDetach() override;
 
         void ChangeSize( const TVec3& new_size ) override;
 

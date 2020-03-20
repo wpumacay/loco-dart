@@ -3,8 +3,8 @@
 #include <loco_common_dart.h>
 #include <loco_simulation.h>
 
-#include <adapters/loco_collision_adapter_dart.h>
-#include <adapters/loco_single_body_adapter_dart.h>
+#include <primitives/loco_single_body_collider_adapter_dart.h>
+#include <primitives/loco_single_body_adapter_dart.h>
 
 namespace loco {
 namespace dartsim {
