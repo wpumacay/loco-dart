@@ -47,7 +47,7 @@ namespace dartsim {
 
         void GetAngularVelocity( TVec3& dst_angular_vel ) override;
 
-        void SetDartWorld( dart::simulation::World* world_ref ) { m_DartWorldRef = world_ref; }
+        void SetDartWorld( dart::simulation::World* world_ref );
 
         dart::dynamics::SkeletonPtr& skeleton() { return m_DartSkeleton; }
 

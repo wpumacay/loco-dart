@@ -21,6 +21,10 @@ namespace dartsim {
 
         ~TDartSimulation();
 
+        dart::simulation::WorldPtr& dart_world() { return m_DartWorld; }
+
+        const dart::simulation::WorldPtr& dart_world() const { return m_DartWorld; }
+
     protected :
 
         bool _InitializeInternal() override;
@@ -42,7 +46,7 @@ namespace dartsim {
 
     private :
 
-        dart::simulation::WorldPtr m_dartWorld;
+        dart::simulation::WorldPtr m_DartWorld;
 
     };
 

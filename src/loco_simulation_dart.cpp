@@ -9,16 +9,16 @@ namespace dartsim {
     {
         m_backendId = "DART";
 
-        m_dartWorld = dart::simulation::World::create();
-        m_dartWorld->setTimeStep( 0.001 );
-        m_dartWorld->setGravity( vec3_to_eigen( { 0, 0, -9.81 } ) );
+        m_DartWorld = dart::simulation::World::create();
+        m_DartWorld->setTimeStep( 0.001 );
+        m_DartWorld->setGravity( vec3_to_eigen( { 0, 0, -9.81 } ) );
 
         // BULLET collision-detector: Faster for meshes, but a bit slower than the ODE version
-        m_dartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::BulletCollisionDetector::create() );
+        m_DartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::BulletCollisionDetector::create() );
         // ODE collision-detector: Faster for primitives, but meshes are awfully slow (should use cvx-hull)
-        //// m_dartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::OdeCollisionDetector::create() );
+        //// m_DartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::OdeCollisionDetector::create() );
 
-        auto boxed_lcp_constraint_solver = dynamic_cast<dart::constraint::BoxedLcpConstraintSolver*>( m_dartWorld->getConstraintSolver() );
+        auto boxed_lcp_constraint_solver = dynamic_cast<dart::constraint::BoxedLcpConstraintSolver*>( m_DartWorld->getConstraintSolver() );
         // DANTZIG constraint-solver: Seems faster, but breaks in some cases (@todo: test+document failure cases)
         boxed_lcp_constraint_solver->setBoxedLcpSolver( std::make_shared<dart::constraint::DantzigBoxedLcpSolver>() );
         boxed_lcp_constraint_solver->setSecondaryBoxedLcpSolver( std::make_shared<dart::constraint::PgsBoxedLcpSolver>() );
@@ -44,24 +44,14 @@ namespace dartsim {
         for ( auto single_body : single_bodies )
         {
             auto single_body_adapter = std::make_unique<TDartSingleBodyAdapter>( single_body );
-            single_body_adapter->SetDartWorld( m_dartWorld.get() );
             single_body->SetBodyAdapter( single_body_adapter.get() );
             m_singleBodyAdapters.push_back( std::move( single_body_adapter ) );
-
-            auto collider = single_body->collider();
-            LOCO_CORE_ASSERT( collider, "TDartSimulation::_CreateSingleBodyAdapters >>> single-body {0} \
-                              must have an associated collider", single_body->name() );
-
-            auto collider_adapter = std::make_unique<TDartSingleBodyColliderAdapter>( collider );
-            collider_adapter->SetDartWorld( m_dartWorld.get() );
-            collider->SetColliderAdapter( collider_adapter.get() );
-            m_collisionAdapters.push_back( std::move( collider_adapter ) );
         }
     }
 
     TDartSimulation::~TDartSimulation()
     {
-        m_dartWorld = nullptr;
+        m_DartWorld = nullptr;
 
     #if defined( LOCO_CORE_USE_TRACK_ALLOCS )
         if ( TLogger::IsActive() )
@@ -73,12 +63,18 @@ namespace dartsim {
 
     bool TDartSimulation::_InitializeInternal()
     {
+        for ( auto& single_body_adapter : m_singleBodyAdapters )
+        {
+            if ( auto dart_adapter = dynamic_cast<TDartSingleBodyAdapter*>( single_body_adapter.get() ) )
+                dart_adapter->SetDartWorld( m_DartWorld.get() );
+        }
+
         // Collect dart-resources from the adapters and assemble any required resources
         // @todo: implement-me ...
 
-        LOCO_CORE_TRACE( "Dart-backend >>> gravity      : {0}", ToString( vec3_from_eigen( m_dartWorld->getGravity() ) ) );
-        LOCO_CORE_TRACE( "Dart-backend >>> time-step    : {0}", std::to_string( m_dartWorld->getTimeStep() ) );
-        LOCO_CORE_TRACE( "Dart-backend >>> num-skeletons: {0}", std::to_string( m_dartWorld->getNumSkeletons() ) );
+        LOCO_CORE_TRACE( "Dart-backend >>> gravity      : {0}", ToString( vec3_from_eigen( m_DartWorld->getGravity() ) ) );
+        LOCO_CORE_TRACE( "Dart-backend >>> time-step    : {0}", std::to_string( m_DartWorld->getTimeStep() ) );
+        LOCO_CORE_TRACE( "Dart-backend >>> num-skeletons: {0}", std::to_string( m_DartWorld->getNumSkeletons() ) );
 
         return true;
     }
@@ -91,9 +87,9 @@ namespace dartsim {
     void TDartSimulation::_SimStepInternal()
     {
         const double target_steptime = 1.0 / 60.0;
-        const double sim_start = m_dartWorld->getTime();
-        while ( m_dartWorld->getTime() - sim_start < target_steptime )
-            m_dartWorld->step();
+        const double sim_start = m_DartWorld->getTime();
+        while ( m_DartWorld->getTime() - sim_start < target_steptime )
+            m_DartWorld->step();
     }
 
     void TDartSimulation::_PostStepInternal()

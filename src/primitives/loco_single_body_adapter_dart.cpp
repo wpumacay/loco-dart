@@ -56,36 +56,39 @@ namespace dartsim {
             m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
 
-        if ( auto collider = m_BodyRef->collider() )
+        auto collider = m_BodyRef->collider();
+        LOCO_CORE_ASSERT( collider, "TDartSingleBodyAdapter::Build >>> single-body {0} doesn't have \
+                          a valid collider (nullptr)", m_BodyRef->name() );
+
+        m_ColliderAdapter = std::make_unique<TDartSingleBodyColliderAdapter>( collider );
+        collider->SetColliderAdapter( m_ColliderAdapter.get() );
+
+        auto dart_collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( m_ColliderAdapter.get() );
+        dart_collider_adapter->Build();
+
+        auto& dart_collision_shape = dart_collider_adapter->collision_shape();
+        auto shape_node = m_DartBodyNodeRef->createShapeNodeWith<
+                                                dart::dynamics::CollisionAspect,
+                                                dart::dynamics::DynamicsAspect>( dart_collision_shape );
+        dart_collider_adapter->SetDartShapeNode( shape_node );
+        if ( dyntype == eDynamicsType::DYNAMIC )
         {
-            if ( auto collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( collider->collider_adapter() ) )
-            {
-                collider_adapter->Build();
-                auto& dart_collision_shape = collider_adapter->collision_shape();
-                auto shape_node = m_DartBodyNodeRef->createShapeNodeWith<
-                                                        dart::dynamics::CollisionAspect,
-                                                        dart::dynamics::DynamicsAspect>( dart_collision_shape );
-                collider_adapter->SetDartShapeNode( shape_node );
-                if ( dyntype == eDynamicsType::DYNAMIC )
-                {
-                    dart::dynamics::Inertia body_inertia;
-                    const auto& inertia_data = m_BodyRef->data().inertia;
+            dart::dynamics::Inertia body_inertia;
+            const auto& inertia_data = m_BodyRef->data().inertia;
 
-                    if ( inertia_data.mass > 0.0f )
-                        body_inertia.setMass( inertia_data.mass );
-                    else
-                        body_inertia.setMass( dart_collision_shape->getVolume() * collider->data().density );
+            if ( inertia_data.mass > 0.0f )
+                body_inertia.setMass( inertia_data.mass );
+            else
+                body_inertia.setMass( dart_collision_shape->getVolume() * collider->data().density );
 
-                    if ( ( inertia_data.ixx > 0.0f ) && ( inertia_data.iyy > 0.0f ) && ( inertia_data.izz > 0.0f ) && 
-                         ( inertia_data.ixy >= 0.0f ) && ( inertia_data.ixz >= 0.0f ) && ( inertia_data.iyz >= 0.0f ) )
-                        body_inertia.setMoment( inertia_data.ixx, inertia_data.iyy, inertia_data.izz,
-                                                inertia_data.ixy, inertia_data.ixz, inertia_data.iyz );
-                    else
-                        body_inertia.setMoment( dart_collision_shape->computeInertia( body_inertia.getMass() ) );
+            if ( ( inertia_data.ixx > 0.0f ) && ( inertia_data.iyy > 0.0f ) && ( inertia_data.izz > 0.0f ) && 
+                 ( inertia_data.ixy >= 0.0f ) && ( inertia_data.ixz >= 0.0f ) && ( inertia_data.iyz >= 0.0f ) )
+                body_inertia.setMoment( inertia_data.ixx, inertia_data.iyy, inertia_data.izz,
+                                        inertia_data.ixy, inertia_data.ixz, inertia_data.iyz );
+            else
+                body_inertia.setMoment( dart_collision_shape->computeInertia( body_inertia.getMass() ) );
 
-                    m_DartBodyNodeRef->setInertia( body_inertia );
-                }
-            }
+            m_DartBodyNodeRef->setInertia( body_inertia );
         }
 
         SetTransform( m_BodyRef->tf0() );
@@ -220,6 +223,13 @@ namespace dartsim {
                           a valid dart-bodynode to get its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
         dst_angular_vel = vec3_from_eigen( m_DartBodyNodeRef->getAngularVelocity() );
+    }
+
+    void TDartSingleBodyAdapter::SetDartWorld( dart::simulation::World* world_ref )
+    {
+        m_DartWorldRef = world_ref;
+        auto dart_collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( m_ColliderAdapter.get() );
+        dart_collider_adapter->SetDartWorld( world_ref );
     }
 
 }}
