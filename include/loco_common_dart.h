@@ -28,4 +28,22 @@ namespace dartsim {
 
     // Creates an assimp-scene object from given user data
     const aiScene* CreateAssimpSceneFromVertexData( const TMeshData& mesh_data );
+
+    // Custom ODE-like collision-filtering functionality
+    class TDartBitmaskCollisionFilter : public dart::collision::BodyNodeCollisionFilter
+    {
+        public :
+
+            bool ignoresCollision( const dart::collision::CollisionObject* object_1,
+                                   const dart::collision::CollisionObject* object_2 ) const override;
+
+            void setCollisionGroup( const dart::dynamics::ShapeNode* shape, int collision_group );
+
+            void setCollisionMask( const dart::dynamics::ShapeNode* shape, int collision_mask );
+
+        private :
+
+            std::unordered_map<const dart::dynamics::ShapeNode*,int> m_CollisionGroupsMap;
+            std::unordered_map<const dart::dynamics::ShapeNode*,int> m_CollisionMasksMap;
+    };
 }}

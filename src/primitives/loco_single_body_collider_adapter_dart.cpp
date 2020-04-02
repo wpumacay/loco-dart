@@ -32,7 +32,16 @@ namespace dartsim {
 
     void TDartSingleBodyColliderAdapter::Initialize()
     {
-        // Nothing extra to setup here
+        LOCO_CORE_ASSERT( m_DartWorldRef, "TDartSingleBodyColliderAdapter::Initialize >>> must have a \
+                          valid reference to the dart-world object to initialize collider {0}", m_ColliderRef->name() );
+
+        auto& collision_filter = m_DartWorldRef->getConstraintSolver()->getCollisionOption().collisionFilter;
+        auto bitmask_collision_filter = dynamic_cast<TDartBitmaskCollisionFilter*>( collision_filter.get() );
+        if ( bitmask_collision_filter )
+        {
+            bitmask_collision_filter->setCollisionGroup( m_DartShapeNodeRef, m_ColliderRef->collisionGroup() );
+            bitmask_collision_filter->setCollisionMask( m_DartShapeNodeRef, m_ColliderRef->collisionMask() );
+        }
     }
 
     void TDartSingleBodyColliderAdapter::OnDetach()

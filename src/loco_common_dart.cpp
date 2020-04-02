@@ -94,7 +94,7 @@ namespace dartsim {
         switch ( data.type )
         {
             case eShapeType::PLANE :
-                return std::make_shared<dart::dynamics::BoxShape>( vec3_to_eigen( { data.size.x(), data.size.y(), 0.01 } ) );
+                return std::make_shared<dart::dynamics::PlaneShape>( vec3_to_eigen( { 0.0, 0.0, 1.0 } ), 0.0 );
             case eShapeType::BOX :
                 return std::make_shared<dart::dynamics::BoxShape>( vec3_to_eigen( data.size ) );
             case eShapeType::SPHERE :
@@ -188,6 +188,46 @@ namespace dartsim {
         }
         //// aiExportScene( assimp_scene, "obj", "./mesh_sample.obj", 0x0 );
         return assimp_scene;
+    }
+
+    /***********************************************************************************************
+    *                              Dart Bitmask Collision Filter Impl.                             *
+    ***********************************************************************************************/
+
+    bool TDartBitmaskCollisionFilter::ignoresCollision( const dart::collision::CollisionObject* object_1,
+                                                        const dart::collision::CollisionObject* object_2 ) const
+    {
+        if ( dart::collision::BodyNodeCollisionFilter::ignoresCollision( object_1, object_2 ) )
+            return true;
+
+        auto shape_node_1 = object_1->getShapeFrame()->asShapeNode();
+        auto shape_node_2 = object_2->getShapeFrame()->asShapeNode();
+
+        if ( m_CollisionGroupsMap.find( shape_node_1 ) == m_CollisionGroupsMap.end() ||
+             m_CollisionGroupsMap.find( shape_node_2 ) == m_CollisionGroupsMap.end() ||
+             m_CollisionMasksMap.find( shape_node_1 ) == m_CollisionMasksMap.end() ||
+             m_CollisionMasksMap.find( shape_node_2 ) == m_CollisionMasksMap.end() )
+            return false;
+
+        auto shape_1_colgroup = m_CollisionGroupsMap.at( shape_node_1 );
+        auto shape_2_colgroup = m_CollisionGroupsMap.at( shape_node_2 );
+        auto shape_1_colmask = m_CollisionMasksMap.at( shape_node_1 );
+        auto shape_2_colmask = m_CollisionMasksMap.at( shape_node_2 );
+
+        bool col_affinity_1_2 = ( shape_1_colgroup & shape_2_colmask ) != 0;
+        bool col_affinity_2_1 = ( shape_2_colgroup & shape_1_colmask ) != 0;
+
+        return !(col_affinity_1_2 || col_affinity_2_1);
+    }
+
+    void TDartBitmaskCollisionFilter::setCollisionGroup( const dart::dynamics::ShapeNode* shape_node, int collision_group )
+    {
+        m_CollisionGroupsMap[shape_node] = collision_group;
+    }
+
+    void TDartBitmaskCollisionFilter::setCollisionMask( const dart::dynamics::ShapeNode* shape_node, int collision_mask )
+    {
+        m_CollisionMasksMap[shape_node] = collision_mask;
     }
 
 }}

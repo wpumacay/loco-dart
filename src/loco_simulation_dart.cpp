@@ -4,6 +4,10 @@
 namespace loco {
 namespace dartsim {
 
+    /***********************************************************************************************
+    *                                    Dart Simulation Impl.                                     *
+    ***********************************************************************************************/
+
     TDartSimulation::TDartSimulation( TScenario* scenarioRef )
         : TISimulation( scenarioRef )
     {
@@ -24,6 +28,8 @@ namespace dartsim {
         boxed_lcp_constraint_solver->setSecondaryBoxedLcpSolver( std::make_shared<dart::constraint::PgsBoxedLcpSolver>() );
         // PROJ.-GAUSS-SEIDEL constraint-solver: More robust where dantzig fails, but still fails in some cases (@todo: test+document failure cases)
         //// boxed_lcp_constraint_solver->setBoxedLcpSolver( std::make_shared<dart::constraint::PgsBoxedLcpSolver>() );
+
+        m_DartWorld->getConstraintSolver()->getCollisionOption().collisionFilter = std::make_shared<TDartBitmaskCollisionFilter>();
 
         _CreateSingleBodyAdapters();
         //// _CreateCompoundAdapters();

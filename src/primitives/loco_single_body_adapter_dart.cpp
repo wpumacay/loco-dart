@@ -101,7 +101,17 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartSkeleton, "TDartSingleBodyAdapter::Initialize >>> body {0} must have \
                           a valid dart-rigid-body. Perhaps missing call to ->Build()?", m_BodyRef->name() );
 
+        // Initialize collider-adapter first (might have geom-id required if static-body)
+        auto dart_collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( m_ColliderAdapter.get() );
+        dart_collider_adapter->Initialize();
+
         m_DartWorldRef->addSkeleton( m_DartSkeleton );
+
+        if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
+        {
+            SetLinearVelocity( m_BodyRef->linear_vel0() );
+            SetAngularVelocity( m_BodyRef->angular_vel0() );
+        }
     }
 
     void TDartSingleBodyAdapter::Reset()
@@ -110,8 +120,8 @@ namespace dartsim {
 
         if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
         {
-            SetLinearVelocity( { 0.0, 0.0, 0.0 } );
-            SetAngularVelocity( { 0.0, 0.0, 0.0 } );
+            SetLinearVelocity( m_BodyRef->linear_vel0() );
+            SetAngularVelocity( m_BodyRef->angular_vel0() );
         }
     }
 
