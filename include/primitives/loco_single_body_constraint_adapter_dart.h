@@ -72,4 +72,35 @@ namespace dartsim {
         void _SetHingeSpeed( TScalar hinge_speed );
     };
 
+    class TDartSingleBodyPrismaticConstraintAdapter : public TISingleBodyPrismaticConstraintAdapter,
+                                                      public TIDartSingleBodyConstraintAdapter
+    {
+    public :
+
+        TDartSingleBodyPrismaticConstraintAdapter( TISingleBodyConstraint* constraint_ref )
+            : TISingleBodyPrismaticConstraintAdapter( constraint_ref ), TIDartSingleBodyConstraintAdapter() {}
+
+        TDartSingleBodyPrismaticConstraintAdapter( const TDartSingleBodyPrismaticConstraintAdapter& other ) = delete;
+
+        TDartSingleBodyPrismaticConstraintAdapter& operator= ( const TDartSingleBodyPrismaticConstraintAdapter& other ) = delete;
+
+        ~TDartSingleBodyPrismaticConstraintAdapter() = default;
+
+        void Build() override;
+
+        void Initialize() override;
+
+        void Reset() override;
+
+        void SetSlidePosition( TScalar slide_position ) override;
+
+        void SetLimits( const TVec2& limits ) override;
+
+        void GetSlidePosition( TScalar& dst_slide_position ) override;
+
+    private :
+
+        void _SetSlideSpeed( TScalar slide_speed );
+    };
+
 }}

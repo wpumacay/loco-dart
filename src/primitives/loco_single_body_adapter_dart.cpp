@@ -52,12 +52,12 @@ namespace dartsim {
                 }
                 else if ( constraint_type == eConstraintType::PRISMATIC )
                 {
-                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyPrismaticConstraintAdapter>( constraint );
-                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+                    m_ConstraintAdapter = std::make_unique<TDartSingleBodyPrismaticConstraintAdapter>( constraint );
+                    constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
 
-                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyPrismaticConstraintAdapter*>( m_ConstraintAdapter.get() );
-                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
-                    //// dart_constraint_adapter->Build();
+                    auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyPrismaticConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    dart_constraint_adapter->Build();
                 }
                 else if ( constraint_type == eConstraintType::SPHERICAL )
                 {
