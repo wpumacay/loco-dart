@@ -86,7 +86,7 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterBuild )
 
     std::vector<std::string> vec_expected_types = { "BoxShape",
                                                     "SphereShape",
-                                                    "BoxShape",
+                                                    "PlaneShape",
                                                     "CylinderShape",
                                                     "CapsuleShape",
                                                     "EllipsoidShape" };
