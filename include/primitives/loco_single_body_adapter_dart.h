@@ -2,6 +2,7 @@
 
 #include <loco_common_dart.h>
 #include <primitives/loco_single_body_collider_adapter_dart.h>
+#include <primitives/loco_single_body_constraint_adapter_dart.h>
 #include <primitives/loco_single_body_adapter.h>
 
 namespace loco {

@@ -59,11 +59,13 @@ namespace dartsim {
     void TDartSingleBodyRevoluteConstraintAdapter::Initialize()
     {
         SetHingeAngle( 0.0f );
+        _SetHingeSpeed( 0.0f );
     }
 
     void TDartSingleBodyRevoluteConstraintAdapter::Reset()
     {
         SetHingeAngle( 0.0f );
+        _SetHingeSpeed( 0.0f );
     }
 
     void TDartSingleBodyRevoluteConstraintAdapter::SetHingeAngle( TScalar hinge_angle )
@@ -92,5 +94,12 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyRevoluteConstraintAdapter::GetHingeAngle >>> \
                           dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
         dst_hinge_angle = m_DartJointRef->getPosition( 0 );
+    }
+
+    void TDartSingleBodyRevoluteConstraintAdapter::_SetHingeSpeed( TScalar hinge_speed )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyRevoluteConstraintAdapter::_SetHingeSpeed >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setVelocity( 0, hinge_speed );
     }
 }}

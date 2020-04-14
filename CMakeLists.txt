@@ -94,6 +94,7 @@ set( LOCO_DART_SRCS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/loco_common_dart.cpp"
      "${CMAKE_CURRENT_SOURCE_DIR}/src/loco_simulation_dart.cpp"
      "${CMAKE_CURRENT_SOURCE_DIR}/src/primitives/loco_single_body_collider_adapter_dart.cpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/primitives/loco_single_body_constraint_adapter_dart.cpp"
      "${CMAKE_CURRENT_SOURCE_DIR}/src/primitives/loco_single_body_adapter_dart.cpp" )
 
 set( LOCO_DART_INCLUDE_DIRS

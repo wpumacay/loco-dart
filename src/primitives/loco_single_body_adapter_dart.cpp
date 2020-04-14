@@ -17,10 +17,6 @@ namespace dartsim {
 
     TDartSingleBodyAdapter::~TDartSingleBodyAdapter()
     {
-        if ( m_BodyRef )
-            m_BodyRef->DetachSim();
-        m_BodyRef = nullptr;
-
         m_DartSkeleton = nullptr;
         m_DartBodyNodeRef = nullptr;
         m_DartJointRef = nullptr;
@@ -30,30 +26,106 @@ namespace dartsim {
     void TDartSingleBodyAdapter::Build()
     {
         m_DartSkeleton = dart::dynamics::Skeleton::create( m_BodyRef->name() );
-        const auto dyntype = m_BodyRef->dyntype();
-        if ( dyntype == eDynamicsType::STATIC )
+        if ( m_BodyRef->dyntype() == eDynamicsType::STATIC )
         {
-            dart::dynamics::BodyNode::Properties body_properties;
-            body_properties.mName = m_BodyRef->name();
             dart::dynamics::WeldJoint::Properties joint_properties;
             joint_properties.mName = m_BodyRef->name() + "_weldjoint";
 
             auto joint_bodynode_pair = m_DartSkeleton->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(
-                                                            nullptr, joint_properties, body_properties );
+                                                            nullptr, joint_properties, dart::dynamics::BodyNode::AspectProperties( m_BodyRef->name() ) );
             m_DartJointRef = joint_bodynode_pair.first;
             m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else
         {
-            dart::dynamics::BodyNode::Properties body_properties;
-            body_properties.mName = m_BodyRef->name();
-            dart::dynamics::FreeJoint::Properties joint_properties;
-            joint_properties.mName = m_BodyRef->name() + "_freejoint";
+            if ( auto constraint = m_BodyRef->constraint() )
+            {
+                const auto constraint_type = constraint->constraint_type();
+                if ( constraint_type == eConstraintType::REVOLUTE )
+                {
+                    m_ConstraintAdapter = std::make_unique<TDartSingleBodyRevoluteConstraintAdapter>( constraint );
+                    constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
 
-            auto joint_bodynode_pair = m_DartSkeleton->createJointAndBodyNodePair<dart::dynamics::FreeJoint>(
-                                                            nullptr, joint_properties, body_properties );
-            m_DartJointRef = joint_bodynode_pair.first;
-            m_DartBodyNodeRef = joint_bodynode_pair.second;
+                    auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyRevoluteConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    dart_constraint_adapter->Build();
+                }
+                else if ( constraint_type == eConstraintType::PRISMATIC )
+                {
+                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyPrismaticConstraintAdapter>( constraint );
+                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+
+                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyPrismaticConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    //// dart_constraint_adapter->Build();
+                }
+                else if ( constraint_type == eConstraintType::SPHERICAL )
+                {
+                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodySphericalConstraintAdapter>( constraint );
+                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+
+                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodySphericalConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    //// dart_constraint_adapter->Build();
+                }
+                else if ( constraint_type == eConstraintType::TRANSLATIONAL3D )
+                {
+                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyTranslational3dConstraintAdapter>( constraint );
+                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+
+                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyTranslational3dConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    //// dart_constraint_adapter->Build();
+                }
+                else if ( constraint_type == eConstraintType::UNIVERSAL3D )
+                {
+                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyUniversal3dConstraintAdapter>( constraint );
+                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+
+                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyUniversal3dConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    //// dart_constraint_adapter->Build();
+                }
+                else if ( constraint_type == eConstraintType::PLANAR )
+                {
+                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyPlanarConstraintAdapter>( constraint );
+                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+
+                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyPlanarConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    //// dart_constraint_adapter->Build();
+                }
+                else
+                {
+                    LOCO_CORE_ERROR( "TBulletSingleBodyAdapter::Build >>> constraint type {0} not supported", ToString( constraint_type ) );
+                }
+
+                if ( auto dart_constraint_adapter = dynamic_cast<TIDartSingleBodyConstraintAdapter*>( m_ConstraintAdapter.get() ) )
+                {
+                    m_DartJointRef = dart_constraint_adapter->joint();
+                    m_DartBodyNodeRef = dart_constraint_adapter->body_node();
+                }
+                else // @debug: for testing while other constraint-adapter are being implemented
+                {
+                    dart::dynamics::FreeJoint::Properties joint_properties;
+                    joint_properties.mName = m_BodyRef->name() + "_freejoint";
+
+                    auto joint_bodynode_pair = m_DartSkeleton->createJointAndBodyNodePair<dart::dynamics::FreeJoint>(
+                                                                    nullptr, joint_properties, dart::dynamics::BodyNode::AspectProperties( m_BodyRef->name() ) );
+                    m_DartJointRef = joint_bodynode_pair.first;
+                    m_DartBodyNodeRef = joint_bodynode_pair.second;
+                }
+            }
+            else
+            {
+                dart::dynamics::FreeJoint::Properties joint_properties;
+                joint_properties.mName = m_BodyRef->name() + "_freejoint";
+
+                auto joint_bodynode_pair = m_DartSkeleton->createJointAndBodyNodePair<dart::dynamics::FreeJoint>(
+                                                                nullptr, joint_properties, dart::dynamics::BodyNode::AspectProperties( m_BodyRef->name() ) );
+                m_DartJointRef = joint_bodynode_pair.first;
+                m_DartBodyNodeRef = joint_bodynode_pair.second;
+            }
         }
 
         auto collider = m_BodyRef->collider();
@@ -71,7 +143,7 @@ namespace dartsim {
                                                 dart::dynamics::CollisionAspect,
                                                 dart::dynamics::DynamicsAspect>( dart_collision_shape );
         dart_collider_adapter->SetDartShapeNode( shape_node );
-        if ( dyntype == eDynamicsType::DYNAMIC )
+        if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
         {
             dart::dynamics::Inertia body_inertia;
             const auto& inertia_data = m_BodyRef->data().inertia;
@@ -107,7 +179,12 @@ namespace dartsim {
 
         m_DartWorldRef->addSkeleton( m_DartSkeleton );
 
-        if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
+        if ( m_BodyRef->constraint() )
+        {
+            if ( m_ConstraintAdapter )
+                m_ConstraintAdapter->Initialize();
+        }
+        else if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
         {
             SetLinearVelocity( m_BodyRef->linear_vel0() );
             SetAngularVelocity( m_BodyRef->angular_vel0() );
@@ -118,7 +195,12 @@ namespace dartsim {
     {
         SetTransform( m_BodyRef->tf0() );
 
-        if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
+        if ( m_BodyRef->constraint() )
+        {
+            if ( m_ConstraintAdapter )
+                m_ConstraintAdapter->Reset();
+        }
+        else if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
         {
             SetLinearVelocity( m_BodyRef->linear_vel0() );
             SetAngularVelocity( m_BodyRef->angular_vel0() );
@@ -137,10 +219,17 @@ namespace dartsim {
                           a valid dart-joint to set its transform. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
         auto dart_tf = mat4_to_eigen_tf( transform );
-        if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
-            static_cast<dart::dynamics::FreeJoint*>( m_DartJointRef )->setTransform( dart_tf );
-        else
+        if ( m_BodyRef->constraint() )
+        {
             m_DartJointRef->setTransformFromParentBodyNode( dart_tf );
+        }
+        else
+        {
+            if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
+                static_cast<dart::dynamics::FreeJoint*>( m_DartJointRef )->setTransform( dart_tf );
+            else
+                m_DartJointRef->setTransformFromParentBodyNode( dart_tf );
+        }
     }
 
     void TDartSingleBodyAdapter::SetLinearVelocity( const TVec3& linear_vel )
@@ -238,8 +327,7 @@ namespace dartsim {
     void TDartSingleBodyAdapter::SetDartWorld( dart::simulation::World* world_ref )
     {
         m_DartWorldRef = world_ref;
-        auto dart_collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( m_ColliderAdapter.get() );
-        dart_collider_adapter->SetDartWorld( world_ref );
+        static_cast<TDartSingleBodyColliderAdapter*>( m_ColliderAdapter.get() )->SetDartWorld( world_ref );
     }
 
 }}

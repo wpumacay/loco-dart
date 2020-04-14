@@ -17,7 +17,7 @@ namespace dartsim {
 
         virtual ~TIDartSingleBodyConstraintAdapter();
 
-        void SetDartSkeleton( dart::dynamics::Skeleton* skeleton_ref ) { m_DartSkeletonRef = nullptr; }
+        void SetDartSkeleton( dart::dynamics::Skeleton* skeleton_ref ) { m_DartSkeletonRef = skeleton_ref; }
 
         dart::dynamics::Skeleton* skeleton() { return m_DartSkeletonRef; }
 
@@ -66,6 +66,10 @@ namespace dartsim {
         void SetLimits( const TVec2& limits ) override;
 
         void GetHingeAngle( TScalar& dst_hinge_angle ) override;
+
+    private :
+
+        void _SetHingeSpeed( TScalar hinge_speed );
     };
 
 }}
