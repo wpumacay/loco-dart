@@ -61,21 +61,21 @@ namespace dartsim {
                 }
                 else if ( constraint_type == eConstraintType::SPHERICAL )
                 {
-                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodySphericalConstraintAdapter>( constraint );
-                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+                    m_ConstraintAdapter = std::make_unique<TDartSingleBodySphericalConstraintAdapter>( constraint );
+                    constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
 
-                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodySphericalConstraintAdapter*>( m_ConstraintAdapter.get() );
-                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
-                    //// dart_constraint_adapter->Build();
+                    auto dart_constraint_adapter = dynamic_cast<TDartSingleBodySphericalConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    dart_constraint_adapter->Build();
                 }
                 else if ( constraint_type == eConstraintType::TRANSLATIONAL3D )
                 {
-                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyTranslational3dConstraintAdapter>( constraint );
-                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+                    m_ConstraintAdapter = std::make_unique<TDartSingleBodyTranslational3dConstraintAdapter>( constraint );
+                    constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
 
-                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyTranslational3dConstraintAdapter*>( m_ConstraintAdapter.get() );
-                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
-                    //// dart_constraint_adapter->Build();
+                    auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyTranslational3dConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    dart_constraint_adapter->Build();
                 }
                 else if ( constraint_type == eConstraintType::UNIVERSAL3D )
                 {
@@ -88,12 +88,12 @@ namespace dartsim {
                 }
                 else if ( constraint_type == eConstraintType::PLANAR )
                 {
-                    //// m_ConstraintAdapter = std::make_unique<TDartSingleBodyPlanarConstraintAdapter>( constraint );
-                    //// constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
+                    m_ConstraintAdapter = std::make_unique<TDartSingleBodyPlanarConstraintAdapter>( constraint );
+                    constraint->SetConstraintAdapter( m_ConstraintAdapter.get() );
 
-                    //// auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyPlanarConstraintAdapter*>( m_ConstraintAdapter.get() );
-                    //// dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
-                    //// dart_constraint_adapter->Build();
+                    auto dart_constraint_adapter = dynamic_cast<TDartSingleBodyPlanarConstraintAdapter*>( m_ConstraintAdapter.get() );
+                    dart_constraint_adapter->SetDartSkeleton( m_DartSkeleton.get() );
+                    dart_constraint_adapter->Build();
                 }
                 else
                 {

@@ -103,4 +103,85 @@ namespace dartsim {
         void _SetSlideSpeed( TScalar slide_speed );
     };
 
+    class TDartSingleBodySphericalConstraintAdapter : public TISingleBodyConstraintAdapter,
+                                                      public TIDartSingleBodyConstraintAdapter
+    {
+    public :
+
+        TDartSingleBodySphericalConstraintAdapter( TISingleBodyConstraint* constraint_ref )
+            : TISingleBodyConstraintAdapter( constraint_ref ), TIDartSingleBodyConstraintAdapter() {}
+
+        TDartSingleBodySphericalConstraintAdapter( const TDartSingleBodySphericalConstraintAdapter& other ) = delete;
+
+        TDartSingleBodySphericalConstraintAdapter& operator= ( const TDartSingleBodySphericalConstraintAdapter& other ) = delete;
+
+        ~TDartSingleBodySphericalConstraintAdapter() = default;
+
+        void Build() override;
+
+        void Initialize() override;
+
+        void Reset() override;
+
+    private :
+
+        void _SetBallPosition( const TVec3& rxyz_position );
+
+        void _SetBallSpeed( const TVec3& rxyz_speed );
+    };
+
+    class TDartSingleBodyTranslational3dConstraintAdapter : public TISingleBodyConstraintAdapter,
+                                                            public TIDartSingleBodyConstraintAdapter
+    {
+    public :
+
+        TDartSingleBodyTranslational3dConstraintAdapter( TISingleBodyConstraint* constraint_ref )
+            : TISingleBodyConstraintAdapter( constraint_ref ), TIDartSingleBodyConstraintAdapter() {}
+
+        TDartSingleBodyTranslational3dConstraintAdapter( const TDartSingleBodyTranslational3dConstraintAdapter& other ) = delete;
+
+        TDartSingleBodyTranslational3dConstraintAdapter& operator= ( const TDartSingleBodyTranslational3dConstraintAdapter& other ) = delete;
+
+        ~TDartSingleBodyTranslational3dConstraintAdapter() = default;
+
+        void Build() override;
+
+        void Initialize() override;
+
+        void Reset() override;
+
+    private :
+
+        void _SetGeneralizedPosition( const TVec3& txyz_position );
+
+        void _SetGeneralizedSpeed( const TVec3& txyz_speed );
+    };
+
+    class TDartSingleBodyPlanarConstraintAdapter : public TISingleBodyConstraintAdapter,
+                                                   public TIDartSingleBodyConstraintAdapter
+    {
+    public :
+
+        TDartSingleBodyPlanarConstraintAdapter( TISingleBodyConstraint* constraint_ref )
+            : TISingleBodyConstraintAdapter( constraint_ref ), TIDartSingleBodyConstraintAdapter() {}
+
+        TDartSingleBodyPlanarConstraintAdapter( const TDartSingleBodyPlanarConstraintAdapter& other ) = delete;
+
+        TDartSingleBodyPlanarConstraintAdapter& operator= ( const TDartSingleBodyPlanarConstraintAdapter& other ) = delete;
+
+        ~TDartSingleBodyPlanarConstraintAdapter() = default;
+
+        void Build() override;
+
+        void Initialize() override;
+
+        void Reset() override;
+
+    private :
+
+        void _SetGeneralizedPosition( const TVec3& txz_ry_position );
+
+        void _SetGeneralizedSpeed( const TVec3& txz_ry_speed );
+    };
+
 }}

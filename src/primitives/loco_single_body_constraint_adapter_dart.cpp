@@ -43,7 +43,7 @@ namespace dartsim {
         dart::dynamics::RevoluteJoint::Properties jnt_properties;
         jnt_properties.mName = joint_name;
         jnt_properties.mAxis = jnt_axis;
-        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pivot;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pivot;
         jnt_properties.mRestPositions[0] = 0.0;
         jnt_properties.mSpringStiffnesses[0] = 0.0;
         jnt_properties.mDampingCoefficients[0] = 0.0;
@@ -124,7 +124,7 @@ namespace dartsim {
         dart::dynamics::PrismaticJoint::Properties jnt_properties;
         jnt_properties.mName = joint_name;
         jnt_properties.mAxis = jnt_axis;
-        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pivot;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pivot;
         jnt_properties.mRestPositions[0] = 0.0;
         jnt_properties.mSpringStiffnesses[0] = 0.0;
         jnt_properties.mDampingCoefficients[0] = 0.0;
@@ -184,4 +184,163 @@ namespace dartsim {
         m_DartJointRef->setVelocity( 0, slide_speed );
     }
 
+    //********************************************************************************************//
+    //                              Spherical-constraint Adapter Impl                             //
+    //********************************************************************************************//
+
+    void TDartSingleBodySphericalConstraintAdapter::Build()
+    {
+        LOCO_CORE_ASSERT( m_DartSkeletonRef, "TDartSingleBodySphericalConstraintAdapter::Build >>> \
+                          dart-skeleton reference must be provided before calling ->Build(), for constraint named {0}", m_ConstraintRef->name() );
+
+        const std::string body_name = m_ConstraintRef->parent()->name();
+        const std::string joint_name = m_ConstraintRef->name();
+
+        const Eigen::Vector3d jnt_pivot = vec3_to_eigen( TVec3( m_ConstraintRef->local_tf().col( 3 ) ) );
+
+        dart::dynamics::BallJoint::Properties jnt_properties;
+        jnt_properties.mName = joint_name;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pivot;
+
+        auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::BallJoint>(
+                                                        nullptr, jnt_properties, dart::dynamics::BodyNode::AspectProperties( body_name ) );
+
+        m_DartJointRef = joint_bodynode_pair.first;
+        m_DartBodyNodeRef = joint_bodynode_pair.second;
+    }
+
+    void TDartSingleBodySphericalConstraintAdapter::Initialize()
+    {
+        _SetBallPosition( { 0.0f, 0.0f, 0.0f } );
+        _SetBallSpeed( { 0.0f, 0.0f, 0.0f } );
+    }
+
+    void TDartSingleBodySphericalConstraintAdapter::Reset()
+    {
+        _SetBallPosition( { 0.0f, 0.0f, 0.0f } );
+        _SetBallSpeed( { 0.0f, 0.0f, 0.0f } );
+    }
+
+    void TDartSingleBodySphericalConstraintAdapter::_SetBallPosition( const TVec3& rxyz_position )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodySphericalConstraintAdapter::_SetBallPosition >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setPosition( 0, rxyz_position.x() );
+        m_DartJointRef->setPosition( 1, rxyz_position.y() );
+        m_DartJointRef->setPosition( 2, rxyz_position.z() );
+    }
+
+    void TDartSingleBodySphericalConstraintAdapter::_SetBallSpeed( const TVec3& rxyz_speed )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodySphericalConstraintAdapter::_SetBallSpeed >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setVelocity( 0, rxyz_speed.x() );
+        m_DartJointRef->setVelocity( 1, rxyz_speed.y() );
+        m_DartJointRef->setVelocity( 2, rxyz_speed.z() );
+    }
+
+    //********************************************************************************************//
+    //                            Translational-constraint Adapter Impl                           //
+    //********************************************************************************************//
+
+    void TDartSingleBodyTranslational3dConstraintAdapter::Build()
+    {
+        LOCO_CORE_ASSERT( m_DartSkeletonRef, "TDartSingleBodyTranslational3dConstraintAdapter::Build >>> \
+                          dart-skeleton reference must be provided before calling ->Build(), for constraint named {0}", m_ConstraintRef->name() );
+
+        const std::string body_name = m_ConstraintRef->parent()->name();
+        const std::string joint_name = m_ConstraintRef->name();
+
+        dart::dynamics::TranslationalJoint::Properties jnt_properties;
+        jnt_properties.mName = joint_name;
+
+        auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::TranslationalJoint>(
+                                                        nullptr, jnt_properties, dart::dynamics::BodyNode::AspectProperties( body_name ) );
+
+        m_DartJointRef = joint_bodynode_pair.first;
+        m_DartBodyNodeRef = joint_bodynode_pair.second;
+    }
+
+    void TDartSingleBodyTranslational3dConstraintAdapter::Initialize()
+    {
+        _SetGeneralizedPosition( { 0.0f, 0.0f, 0.0f } );
+        _SetGeneralizedSpeed( { 0.0f, 0.0f, 0.0f } );
+    }
+
+    void TDartSingleBodyTranslational3dConstraintAdapter::Reset()
+    {
+        _SetGeneralizedPosition( { 0.0f, 0.0f, 0.0f } );
+        _SetGeneralizedSpeed( { 0.0f, 0.0f, 0.0f } );
+    }
+
+    void TDartSingleBodyTranslational3dConstraintAdapter::_SetGeneralizedPosition( const TVec3& txyz_position )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyTranslational3dConstraintAdapter::_SetBallPosition >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setPosition( 0, txyz_position.x() );
+        m_DartJointRef->setPosition( 1, txyz_position.y() );
+        m_DartJointRef->setPosition( 2, txyz_position.z() );
+    }
+
+    void TDartSingleBodyTranslational3dConstraintAdapter::_SetGeneralizedSpeed( const TVec3& txyz_speed )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyTranslational3dConstraintAdapter::_SetBallSpeed >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setVelocity( 0, txyz_speed.x() );
+        m_DartJointRef->setVelocity( 1, txyz_speed.y() );
+        m_DartJointRef->setVelocity( 2, txyz_speed.z() );
+    }
+
+    //********************************************************************************************//
+    //                            Translational-constraint Adapter Impl                           //
+    //********************************************************************************************//
+
+    void TDartSingleBodyPlanarConstraintAdapter::Build()
+    {
+        LOCO_CORE_ASSERT( m_DartSkeletonRef, "TDartSingleBodyPlanarConstraintAdapter::Build >>> \
+                          dart-skeleton reference must be provided before calling ->Build(), for constraint named {0}", m_ConstraintRef->name() );
+
+        const std::string body_name = m_ConstraintRef->parent()->name();
+        const std::string joint_name = m_ConstraintRef->name();
+
+        dart::dynamics::PlanarJoint::Properties jnt_properties;
+        jnt_properties.mPlaneType = dart::dynamics::detail::PlaneType::ZX;
+        jnt_properties.mName = joint_name;
+
+        auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::PlanarJoint>(
+                                                        nullptr, jnt_properties, dart::dynamics::BodyNode::AspectProperties( body_name ) );
+
+        m_DartJointRef = joint_bodynode_pair.first;
+        m_DartBodyNodeRef = joint_bodynode_pair.second;
+    }
+
+    void TDartSingleBodyPlanarConstraintAdapter::Initialize()
+    {
+        _SetGeneralizedPosition( { 0.0f, 0.0f, 0.0f } );
+        _SetGeneralizedSpeed( { 0.0f, 0.0f, 0.0f } );
+    }
+
+    void TDartSingleBodyPlanarConstraintAdapter::Reset()
+    {
+        _SetGeneralizedPosition( { 0.0f, 0.0f, 0.0f } );
+        _SetGeneralizedSpeed( { 0.0f, 0.0f, 0.0f } );
+    }
+
+    void TDartSingleBodyPlanarConstraintAdapter::_SetGeneralizedPosition( const TVec3& txz_ry_position )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyPlanarConstraintAdapter::_SetBallPosition >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setPosition( 0, txz_ry_position.x() ); // trans-x is first dof
+        m_DartJointRef->setPosition( 1, txz_ry_position.z() ); // trans-z is second dof
+        m_DartJointRef->setPosition( 2, txz_ry_position.y() ); // rot-y is third dof
+    }
+
+    void TDartSingleBodyPlanarConstraintAdapter::_SetGeneralizedSpeed( const TVec3& txz_ry_speed )
+    {
+        LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyPlanarConstraintAdapter::_SetBallSpeed >>> \
+                          dart-joint reference must be valid (got nullptr), for constraint named \"{0}\"", m_ConstraintRef->name() );
+        m_DartJointRef->setVelocity( 0, txz_ry_speed.x() ); // trans-x is first dof
+        m_DartJointRef->setVelocity( 1, txz_ry_speed.z() ); // trans-z is second dof
+        m_DartJointRef->setVelocity( 2, txz_ry_speed.y() ); // rot-y is third dof
+    }
 }}
