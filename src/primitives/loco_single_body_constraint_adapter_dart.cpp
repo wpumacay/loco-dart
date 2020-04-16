@@ -33,17 +33,27 @@ namespace dartsim {
                           constraint reference must be of type \"Revolute\", for constraint named {0}", m_ConstraintRef->name() );
         LOCO_CORE_ASSERT( m_DartSkeletonRef, "TDartSingleBodyRevoluteConstraintAdapter::Build >>> \
                           dart-skeleton reference must be provided before calling ->Build(), for constraint named {0}", m_ConstraintRef->name() );
+        LOCO_CORE_ASSERT( m_ConstraintRef->parent(), "TDartSingleBodyRevoluteConstraintAdapter::Build >>> \
+                          constraint must be assigned to a parent. Got nullptr for constraint named {0}", m_ConstraintRef->name() );
 
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d jnt_pivot = vec3_to_eigen( TVec3( revolute_constraint->local_tf().col( 3 ) ) );
-        const Eigen::Vector3d jnt_axis = vec3_to_eigen( TMat3( revolute_constraint->local_tf() ) * revolute_constraint->axis() );
+        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( TVec3( revolute_constraint->local_tf().col( 3 ) ) );
+        const Eigen::Matrix3d jnt_rot_local = mat3_to_eigen( TMat3( revolute_constraint->local_tf() ) );
+        const Eigen::Vector3d jnt_axis_world = vec3_to_eigen( TMat3( revolute_constraint->local_tf() ) * revolute_constraint->axis() );
+        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Matrix3d body_rot_world = mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
+        const Eigen::Vector3d jnt_pos_world = body_pos_world + body_rot_world * jnt_pos_local;
+        const Eigen::Matrix3d jnt_rot_world = body_rot_world;
 
         dart::dynamics::RevoluteJoint::Properties jnt_properties;
         jnt_properties.mName = joint_name;
-        jnt_properties.mAxis = jnt_axis;
-        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pivot;
+        jnt_properties.mAxis = jnt_axis_world;
+        jnt_properties.mT_ParentBodyToJoint.linear() = jnt_rot_world;
+        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pos_world;
+        jnt_properties.mT_ChildBodyToJoint.linear() = jnt_rot_local;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pos_local;
         jnt_properties.mRestPositions[0] = 0.0;
         jnt_properties.mSpringStiffnesses[0] = 0.0;
         jnt_properties.mDampingCoefficients[0] = 0.0;
@@ -118,13 +128,21 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d jnt_pivot = vec3_to_eigen( TVec3( prismatic_constraint->local_tf().col( 3 ) ) );
-        const Eigen::Vector3d jnt_axis = vec3_to_eigen( TMat3( prismatic_constraint->local_tf() ) * prismatic_constraint->axis() );
+        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( TVec3( prismatic_constraint->local_tf().col( 3 ) ) );
+        const Eigen::Matrix3d jnt_rot_local = mat3_to_eigen( TMat3( prismatic_constraint->local_tf() ) );
+        const Eigen::Vector3d jnt_axis_world = vec3_to_eigen( TMat3( prismatic_constraint->local_tf() ) * prismatic_constraint->axis() );
+        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Matrix3d body_rot_world = mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
+        const Eigen::Vector3d jnt_pos_world = body_pos_world + body_rot_world * jnt_pos_local;
+        const Eigen::Matrix3d jnt_rot_world = body_rot_world;
 
         dart::dynamics::PrismaticJoint::Properties jnt_properties;
         jnt_properties.mName = joint_name;
-        jnt_properties.mAxis = jnt_axis;
-        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pivot;
+        jnt_properties.mAxis = jnt_axis_world;
+        jnt_properties.mT_ParentBodyToJoint.linear() = jnt_rot_world;
+        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pos_world;
+        jnt_properties.mT_ChildBodyToJoint.linear() = jnt_rot_local;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pos_local;
         jnt_properties.mRestPositions[0] = 0.0;
         jnt_properties.mSpringStiffnesses[0] = 0.0;
         jnt_properties.mDampingCoefficients[0] = 0.0;
@@ -196,11 +214,19 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d jnt_pivot = vec3_to_eigen( TVec3( m_ConstraintRef->local_tf().col( 3 ) ) );
+        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( TVec3( m_ConstraintRef->local_tf().col( 3 ) ) );
+        const Eigen::Matrix3d jnt_rot_local = mat3_to_eigen( TMat3( m_ConstraintRef->local_tf() ) );
+        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Matrix3d body_rot_world = mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
+        const Eigen::Vector3d jnt_pos_world = body_pos_world + body_rot_world * jnt_pos_local;
+        const Eigen::Matrix3d jnt_rot_world = body_rot_world;
 
         dart::dynamics::BallJoint::Properties jnt_properties;
         jnt_properties.mName = joint_name;
-        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pivot;
+        jnt_properties.mT_ParentBodyToJoint.linear() = jnt_rot_world;
+        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pos_world;
+        jnt_properties.mT_ChildBodyToJoint.linear() = jnt_rot_local;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pos_local;
 
         auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::BallJoint>(
                                                         nullptr, jnt_properties, dart::dynamics::BodyNode::AspectProperties( body_name ) );
@@ -251,8 +277,14 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
+        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( { 0.0, 0.0, 0.0 } );
+        const Eigen::Vector3d jnt_pos_world = body_pos_world + jnt_pos_local; // rotation is identity
+
         dart::dynamics::TranslationalJoint::Properties jnt_properties;
         jnt_properties.mName = joint_name;
+        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pos_world;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pos_local;
 
         auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::TranslationalJoint>(
                                                         nullptr, jnt_properties, dart::dynamics::BodyNode::AspectProperties( body_name ) );
@@ -292,7 +324,7 @@ namespace dartsim {
     }
 
     //********************************************************************************************//
-    //                            Translational-constraint Adapter Impl                           //
+    //                                Planar-constraint Adapter Impl                              //
     //********************************************************************************************//
 
     void TDartSingleBodyPlanarConstraintAdapter::Build()
@@ -303,9 +335,15 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
+        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( { 0.0, 0.0, 0.0 } );
+        const Eigen::Vector3d jnt_pos_world = body_pos_world + jnt_pos_local; // rotation is identity
+
         dart::dynamics::PlanarJoint::Properties jnt_properties;
         jnt_properties.mPlaneType = dart::dynamics::detail::PlaneType::ZX;
         jnt_properties.mName = joint_name;
+        jnt_properties.mT_ParentBodyToJoint.translation() = jnt_pos_world;
+        jnt_properties.mT_ChildBodyToJoint.translation() = jnt_pos_local;
 
         auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::PlanarJoint>(
                                                         nullptr, jnt_properties, dart::dynamics::BodyNode::AspectProperties( body_name ) );

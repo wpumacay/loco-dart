@@ -105,8 +105,9 @@ namespace dartsim {
                     m_DartJointRef = dart_constraint_adapter->joint();
                     m_DartBodyNodeRef = dart_constraint_adapter->body_node();
                 }
-                else // @debug: for testing while other constraint-adapter are being implemented
+                else
                 {
+                    LOCO_CORE_WARN( "TBulletSingleBodyAdapter::Build >>> body \"{0}\" using free-joint for not-supported constraint adapter", m_BodyRef->name() );
                     dart::dynamics::FreeJoint::Properties joint_properties;
                     joint_properties.mName = m_BodyRef->name() + "_freejoint";
 
@@ -162,8 +163,6 @@ namespace dartsim {
 
             m_DartBodyNodeRef->setInertia( body_inertia );
         }
-
-        SetTransform( m_BodyRef->tf0() );
     }
 
     void TDartSingleBodyAdapter::Initialize()
@@ -186,6 +185,7 @@ namespace dartsim {
         }
         else if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
         {
+            SetTransform( m_BodyRef->tf0() );
             SetLinearVelocity( m_BodyRef->linear_vel0() );
             SetAngularVelocity( m_BodyRef->angular_vel0() );
         }
@@ -193,8 +193,6 @@ namespace dartsim {
 
     void TDartSingleBodyAdapter::Reset()
     {
-        SetTransform( m_BodyRef->tf0() );
-
         if ( m_BodyRef->constraint() )
         {
             if ( m_ConstraintAdapter )
@@ -202,6 +200,7 @@ namespace dartsim {
         }
         else if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
         {
+            SetTransform( m_BodyRef->tf0() );
             SetLinearVelocity( m_BodyRef->linear_vel0() );
             SetAngularVelocity( m_BodyRef->angular_vel0() );
         }
@@ -218,18 +217,14 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyAdapter::SetTransform >>> body {0} must have \
                           a valid dart-joint to set its transform. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
-        auto dart_tf = mat4_to_eigen_tf( transform );
         if ( m_BodyRef->constraint() )
-        {
-            m_DartJointRef->setTransformFromParentBodyNode( dart_tf );
-        }
+            return;
+
+        auto dart_tf = mat4_to_eigen_tf( transform );
+        if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
+            static_cast<dart::dynamics::FreeJoint*>( m_DartJointRef )->setTransform( dart_tf );
         else
-        {
-            if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
-                static_cast<dart::dynamics::FreeJoint*>( m_DartJointRef )->setTransform( dart_tf );
-            else
-                m_DartJointRef->setTransformFromParentBodyNode( dart_tf );
-        }
+            m_DartJointRef->setTransformFromParentBodyNode( dart_tf );
     }
 
     void TDartSingleBodyAdapter::SetLinearVelocity( const TVec3& linear_vel )
@@ -238,6 +233,9 @@ namespace dartsim {
                           a valid dart-joint to set its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::SetLinearVelocity >>> body {0} must have \
                           a valid dart-bodynode to set its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
+
+        if ( m_BodyRef->constraint() )
+            return;
 
         if ( m_DartJointRef->getNumDofs() != 6 )
         {
@@ -264,6 +262,9 @@ namespace dartsim {
                           a valid dart-joint to set its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::SetAngularVelocity >>> body {0} must have \
                           a valid dart-bodynode to set its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
+
+        if ( m_BodyRef->constraint() )
+            return;
 
         if ( m_DartJointRef->getNumDofs() != 6 )
         {
