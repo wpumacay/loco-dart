@@ -47,7 +47,7 @@ BuildGroup build_body( const std::string& name,
 
 TEST( TestLocoDartSingleBodyAdapter, TestLocoDartSingleBodyAdapterBuild )
 {
-    loco::TLogger::Init();
+    loco::InitUtils();
 
     std::vector<std::string> vec_names = { "floor",
                                            "boxy",

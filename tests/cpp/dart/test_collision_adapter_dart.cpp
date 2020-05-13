@@ -49,7 +49,7 @@ std::pair<std::vector<float>, std::vector<int>> create_mesh_tetrahedron()
 
 TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterBuild )
 {
-    loco::TLogger::Init();
+    loco::InitUtils();
 
     std::vector<loco::eShapeType> vec_col_types = { loco::eShapeType::BOX,
                                                     loco::eShapeType::SPHERE,
@@ -137,7 +137,7 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterBuild )
 
 TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterMeshBuild )
 {
-    loco::TLogger::Init();
+    loco::InitUtils();
 
     auto col_data = loco::TCollisionData();
     col_data.type = loco::eShapeType::MESH;
@@ -158,7 +158,7 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterMeshBuild )
 
 TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterMeshUserBuild )
 {
-    loco::TLogger::Init();
+    loco::InitUtils();
 
     auto vertices_faces = create_mesh_tetrahedron();
 
@@ -181,7 +181,7 @@ TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterMeshUserBuild )
 
 TEST( TestLocoDartCollisionAdapter, TestLocoDartCollisionAdapterHfieldBuild )
 {
-    loco::TLogger::Init();
+    loco::InitUtils();
 
     const size_t num_width_samples = 40;
     const size_t num_depth_samples = 40;

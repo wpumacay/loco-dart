@@ -230,9 +230,9 @@ namespace dartsim {
     void TDartSingleBodyAdapter::SetLinearVelocity( const TVec3& linear_vel )
     {
         LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyAdapter::SetLinearVelocity >>> body {0} must have \
-                          a valid dart-joint to set its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
+                          a valid dart-joint to set its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::SetLinearVelocity >>> body {0} must have \
-                          a valid dart-bodynode to set its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
+                          a valid dart-bodynode to set its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
         if ( m_BodyRef->constraint() )
             return;
@@ -259,9 +259,9 @@ namespace dartsim {
     void TDartSingleBodyAdapter::SetAngularVelocity( const TVec3& angular_vel )
     {
         LOCO_CORE_ASSERT( m_DartJointRef, "TDartSingleBodyAdapter::SetAngularVelocity >>> body {0} must have \
-                          a valid dart-joint to set its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
+                          a valid dart-joint to set its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::SetAngularVelocity >>> body {0} must have \
-                          a valid dart-bodynode to set its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() )
+                          a valid dart-bodynode to set its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
         if ( m_BodyRef->constraint() )
             return;

@@ -104,7 +104,7 @@ set( LOCO_DART_INCLUDE_DIRS
      "${CMAKE_SOURCE_DIR}/core/ext/tinyxml2"
      "${CMAKE_SOURCE_DIR}/ext/spdlog/include"
      "${CMAKE_SOURCE_DIR}/ext/tiny_math/include"
-     "${CMAKE_SOURCE_DIR}/ext/raisim/include"
+     "${CMAKE_SOURCE_DIR}/ext/tiny_utils/include"
      "${CMAKE_SOURCE_DIR}/ext/dart"
      "${CMAKE_BINARY_DIR}/ext/dart"
      "${EIGEN3_INCLUDE_DIR}" )

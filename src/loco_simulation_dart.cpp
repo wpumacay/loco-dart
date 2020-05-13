@@ -37,10 +37,10 @@ namespace dartsim {
         //// _CreateTerrainGeneratorAdapters();
 
     #if defined( LOCO_CORE_USE_TRACK_ALLOCS )
-        if ( TLogger::IsActive() )
-            LOCO_CORE_TRACE( "Loco::Allocs: Created TDartSimulation @ {0}", loco::PointerToHexAddress( this ) );
+        if ( tinyutils::Logger::IsActive() )
+            LOCO_CORE_TRACE( "Loco::Allocs: Created TDartSimulation @ {0}", tinyutils::PointerToHexAddress( this ) );
         else
-            std::cout << "Loco::Allocs: Created TDartSimulation @ " << loco::PointerToHexAddress( this ) << std::endl;
+            std::cout << "Loco::Allocs: Created TDartSimulation @ " << tinyutils::PointerToHexAddress( this ) << std::endl;
     #endif
     }
 
@@ -60,10 +60,10 @@ namespace dartsim {
         m_DartWorld = nullptr;
 
     #if defined( LOCO_CORE_USE_TRACK_ALLOCS )
-        if ( TLogger::IsActive() )
-            LOCO_CORE_TRACE( "Loco::Allocs: Destroyed TDartSimulation @ {0}", loco::PointerToHexAddress( this ) );
+        if ( tinyutils::Logger::IsActive() )
+            LOCO_CORE_TRACE( "Loco::Allocs: Destroyed TDartSimulation @ {0}", tinyutils::PointerToHexAddress( this ) );
         else
-            std::cout << "Loco::Allocs: Destroyed TDartSimulation @ " << loco::PointerToHexAddress( this ) << std::endl;
+            std::cout << "Loco::Allocs: Destroyed TDartSimulation @ " << tinyutils::PointerToHexAddress( this ) << std::endl;
     #endif
     }
 
