@@ -65,4 +65,8 @@ set( DART_BUILD_TUTORIALS OFF CACHE BOOL "Build dart-tutorials" )
 set( DART_BUILD_TESTS OFF CACHE BOOL "Build dart-tests" )
 set( DART_VERBOSE ON CACHE BOOL "Build with full logs")
 
+# Force release-type build for dart (debug mode is way too slow)
+set( TMP_PROJECT_BUILD_TYPE ${CMAKE_BUILD_TYPE} )
+set( CMAKE_BUILD_TYPE "Release" )
 add_subdirectory( dart )
+set( CMAKE_BUILD_TYPE ${TMP_PROJECT_BUILD_TYPE} )
