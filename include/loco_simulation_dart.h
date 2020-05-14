@@ -31,11 +31,15 @@ namespace dartsim {
 
         void _PreStepInternal() override;
 
-        void _SimStepInternal() override;
+        void _SimStepInternal( const TScalar& dt ) override;
 
         void _PostStepInternal() override;
 
         void _ResetInternal() override;
+
+        void _SetTimeStepInternal( const TScalar& time_step ) override;
+
+        void _SetGravityInternal( const TVec3& gravity ) override;
 
     private :
 

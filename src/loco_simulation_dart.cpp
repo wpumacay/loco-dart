@@ -11,11 +11,11 @@ namespace dartsim {
     TDartSimulation::TDartSimulation( TScenario* scenarioRef )
         : TISimulation( scenarioRef )
     {
-        m_backendId = "DART";
+        m_BackendId = "DART";
 
         m_DartWorld = dart::simulation::World::create();
-        m_DartWorld->setTimeStep( 0.001 );
-        m_DartWorld->setGravity( vec3_to_eigen( { 0, 0, -9.81 } ) );
+        m_DartWorld->setTimeStep( m_FixedTimeStep );
+        m_DartWorld->setGravity( vec3_to_eigen( m_Gravity ) );
 
         // BULLET collision-detector: Faster for meshes, but a bit slower than the ODE version
         m_DartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::BulletCollisionDetector::create() );
@@ -46,12 +46,12 @@ namespace dartsim {
 
     void TDartSimulation::_CreateSingleBodyAdapters()
     {
-        auto single_bodies = m_scenarioRef->GetSingleBodiesList();
+        auto single_bodies = m_ScenarioRef->GetSingleBodiesList();
         for ( auto single_body : single_bodies )
         {
             auto single_body_adapter = std::make_unique<TDartSingleBodyAdapter>( single_body );
             single_body->SetBodyAdapter( single_body_adapter.get() );
-            m_singleBodyAdapters.push_back( std::move( single_body_adapter ) );
+            m_SingleBodyAdapters.push_back( std::move( single_body_adapter ) );
         }
     }
 
@@ -69,7 +69,7 @@ namespace dartsim {
 
     bool TDartSimulation::_InitializeInternal()
     {
-        for ( auto& single_body_adapter : m_singleBodyAdapters )
+        for ( auto& single_body_adapter : m_SingleBodyAdapters )
         {
             if ( auto dart_adapter = dynamic_cast<TDartSingleBodyAdapter*>( single_body_adapter.get() ) )
                 dart_adapter->SetDartWorld( m_DartWorld.get() );
@@ -90,12 +90,17 @@ namespace dartsim {
         // Do nothing here, as call to wrappers is enough (made in base)
     }
 
-    void TDartSimulation::_SimStepInternal()
+    void TDartSimulation::_SimStepInternal( const TScalar& dt )
     {
-        const double target_steptime = 1.0 / 60.0;
-        const double sim_start = m_DartWorld->getTime();
-        while ( m_DartWorld->getTime() - sim_start < target_steptime )
+        LOCO_CORE_ASSERT( m_DartWorld, "TDartSimulation::_SimStepInternal >>> \
+                          dart-world is required, but got nullptr instead" );
+        const double sim_step_time = ( dt <= 0 ) ? m_FixedTimeStep : dt;
+        const double sim_start_time = m_DartWorld->getTime();
+        while ( m_DartWorld->getTime() - sim_start_time < sim_step_time )
+        {
             m_DartWorld->step();
+            m_WorldTime += m_FixedTimeStep;
+        }
     }
 
     void TDartSimulation::_PostStepInternal()
@@ -106,6 +111,20 @@ namespace dartsim {
     void TDartSimulation::_ResetInternal()
     {
         // @todo: reset loco-contact-manager
+    }
+
+    void TDartSimulation::_SetTimeStepInternal( const TScalar& time_step )
+    {
+        LOCO_CORE_ASSERT( m_DartWorld, "TDartSimulation::_SetTimeStepInternal >>> \
+                          dart-world is required, but got nullptr instead" );
+        m_DartWorld->setTimeStep( time_step );
+    }
+
+    void TDartSimulation::_SetGravityInternal( const TVec3& gravity )
+    {
+        LOCO_CORE_ASSERT( m_DartWorld, "TDartSimulation::_SetGravityInternal >>> \
+                          dart-world is required, but got nullptr instead" );
+        m_DartWorld->setGravity( vec3_to_eigen( gravity ) );
     }
 
     extern "C" TISimulation* simulation_create( TScenario* scenarioRef )

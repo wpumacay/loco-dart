@@ -110,13 +110,13 @@ namespace dartsim {
                 const auto& mesh_data = data.mesh_data;
                 if ( mesh_data.filename != "" )
                 {
-                    if ( const auto assimp_scene = dart::dynamics::MeshShape::loadMesh( mesh_data.filename ) )
-                        return std::make_shared<dart::dynamics::MeshShape>( vec3_to_eigen( data.size ), assimp_scene );
+                    if ( const auto assimp_scene = dart::dynamics::ConvexHullShape::loadMesh( mesh_data.filename ) )
+                        return std::make_shared<dart::dynamics::ConvexHullShape>( vec3_to_eigen( data.size ), assimp_scene );
                 }
                 else if ( mesh_data.vertices.size() > 0 )
                 {
                     if ( const auto assimp_scene = CreateAssimpSceneFromVertexData( mesh_data ) )
-                        return std::make_shared<dart::dynamics::MeshShape>( vec3_to_eigen( data.size ), assimp_scene );
+                        return std::make_shared<dart::dynamics::ConvexHullShape>( vec3_to_eigen( data.size ), assimp_scene );
                 }
 
                 LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart mesh-shape" );
