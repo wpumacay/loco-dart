@@ -85,6 +85,68 @@ namespace dartsim {
         return true;
     }
 
+    void TDartSimulation::_CollectContacts()
+    {
+        LOCO_CORE_ASSERT( m_DartWorld, "TDartSimulation::_CollectContacts >>> dart-world object \
+                           is required, but got nullptr instead" );
+
+        std::unordered_map<const dart::dynamics::Shape*, std::string> shape_to_collider;
+        auto single_bodies = m_ScenarioRef->GetSingleBodiesList();
+        for ( auto single_body : single_bodies )
+        {
+            auto collider = single_body->collider();
+            auto dart_collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( collider->collider_adapter() );
+            const dart::dynamics::Shape* dart_collider_shape = dart_collider_adapter->collision_shape().get();
+            shape_to_collider[dart_collider_shape] = collider->name();
+        }
+
+        std::map< std::string, std::vector<TContactData> > detected_contacts;
+        const auto& collision_result = m_DartWorld->getLastCollisionResult();
+        const size_t num_contacts = collision_result.getNumContacts();
+        for ( size_t i = 0; i < num_contacts; i++ )
+        {
+            const auto& contact_info = collision_result.getContact( i );
+            const dart::dynamics::Shape* collider_shape_1 = contact_info.collisionObject1->getShape().get();
+            const dart::dynamics::Shape* collider_shape_2 = contact_info.collisionObject2->getShape().get();
+            if ( ( shape_to_collider.find( collider_shape_1 ) == shape_to_collider.end() ) ||
+                 ( shape_to_collider.find( collider_shape_2 ) == shape_to_collider.end() ) )
+            {
+                LOCO_CORE_WARN( "TDartSimulation::_CollectContacts >>> a contact is dangling without a contact-pair" );
+                continue;
+            }
+
+            const std::string collider_1 = shape_to_collider[collider_shape_1];
+            const std::string collider_2 = shape_to_collider[collider_shape_2];
+            const TVec3 position = vec3_from_eigen( contact_info.point );
+            const TVec3 normal = vec3_from_eigen( contact_info.normal );
+
+            if ( detected_contacts.find( collider_1 ) == detected_contacts.end() )
+                detected_contacts[collider_1] = std::vector<TContactData>();
+            if ( detected_contacts.find( collider_2 ) == detected_contacts.end() )
+                detected_contacts[collider_2] = std::vector<TContactData>();
+
+            TContactData contact_1, contact_2;
+            contact_1.position = position;  contact_2.position = position;
+            contact_1.normal = normal;      contact_2.normal = normal.scaled( -1.0 );
+            contact_1.name = collider_2;    contact_2.name = collider_1;
+
+            detected_contacts[collider_1].push_back( contact_1 );
+            detected_contacts[collider_2].push_back( contact_2 );
+        }
+
+        for ( auto single_body : single_bodies )
+        {
+            auto collider = single_body->collider();
+            auto collider_name = collider->name();
+
+            collider->contacts().clear();
+            if ( detected_contacts.find( collider_name ) != detected_contacts.end() )
+                collider->contacts() = detected_contacts[collider_name];
+
+            LOCO_CORE_INFO( "collider: {0}, num_contacts: {1}", collider_name, collider->contacts().size() );
+        }
+    }
+
     void TDartSimulation::_PreStepInternal()
     {
         // Do nothing here, as call to wrappers is enough (made in base)
@@ -105,7 +167,7 @@ namespace dartsim {
 
     void TDartSimulation::_PostStepInternal()
     {
-        // @todo: run loco-contact-manager here to grab all detected contacts
+        _CollectContacts();
     }
 
     void TDartSimulation::_ResetInternal()

@@ -44,9 +44,14 @@ namespace dartsim {
     private :
 
         void _CreateSingleBodyAdapters();
+
         //// void _CreateCompoundAdapters();
+
         //// void _CreateKintreeAdapters();
+
         //// void _CreateTerrainGeneratorAdapters();
+
+        void _CollectContacts();
 
     private :
 
