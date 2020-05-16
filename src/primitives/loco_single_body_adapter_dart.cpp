@@ -189,6 +189,10 @@ namespace dartsim {
             SetLinearVelocity( m_BodyRef->linear_vel0() );
             SetAngularVelocity( m_BodyRef->angular_vel0() );
         }
+        else if ( m_BodyRef->dyntype() == eDynamicsType::STATIC )
+        {
+            SetTransform( m_BodyRef->tf0() );
+        }
     }
 
     void TDartSingleBodyAdapter::Reset()
