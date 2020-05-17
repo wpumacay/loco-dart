@@ -158,9 +158,10 @@ namespace dartsim {
                           dart-world is required, but got nullptr instead" );
         const double sim_step_time = ( dt <= 0 ) ? m_FixedTimeStep : dt;
         const double sim_start_time = m_DartWorld->getTime();
-        while ( m_DartWorld->getTime() - sim_start_time < sim_step_time )
+        const ssize_t sim_num_substeps = ssize_t(sim_step_time / m_FixedTimeStep);
+        for ( ssize_t i = sim_num_substeps - 1; i >= 0; i-- )
         {
-            m_DartWorld->step();
+            m_DartWorld->step( (i == 0) );
             m_WorldTime += m_FixedTimeStep;
         }
     }
