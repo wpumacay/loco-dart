@@ -42,6 +42,7 @@ namespace dartsim {
             bitmask_collision_filter->setCollisionGroup( m_DartShapeNodeRef, m_ColliderRef->collisionGroup() );
             bitmask_collision_filter->setCollisionMask( m_DartShapeNodeRef, m_ColliderRef->collisionMask() );
         }
+        ChangeFriction( m_ColliderRef->data().friction.x() );
     }
 
     void TDartSingleBodyColliderAdapter::OnDetach()
@@ -165,6 +166,18 @@ namespace dartsim {
         // @todo: Must extend Dart functionality to allow collision-groups and collision-masks, as
         //        in bullet, mujoco, and raisim. So far, it seems only single exclusions are possible.
         LOCO_CORE_WARN( "TDartSingleBodyColliderAdapter::ChangeCollisionMask >>> feature not supported yet" );
+    }
+
+    void TDartSingleBodyColliderAdapter::ChangeFriction( const TScalar& friction )
+    {
+        if ( !m_DartShapeNodeRef )
+        {
+            LOCO_CORE_ERROR( "TDartSingleBodyColliderAdapter::ChangeFriction >>> collider {0} doesn't have \
+                             a handle to its corresponding dart-shape-node", m_ColliderRef->name() );
+            return;
+        }
+
+        m_DartShapeNodeRef->getDynamicsAspect()->setFrictionCoeff( friction );
     }
 
 }}
