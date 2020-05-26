@@ -96,7 +96,7 @@ namespace dartsim {
             }
             case eShapeType::MESH :
             {
-                if ( auto mesh_shape = dynamic_cast<dart::dynamics::MeshShape*>( m_DartShape.get() ) )
+                if ( auto mesh_shape = dynamic_cast<dart::dynamics::ConvexHullShape*>( m_DartShape.get() ) )
                     mesh_shape->setScale( vec3_to_eigen( new_size ) );
                 break;
             }
