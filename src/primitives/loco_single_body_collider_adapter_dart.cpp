@@ -125,7 +125,7 @@ namespace dartsim {
         const ssize_t num_width_samples = m_ColliderRef->data().hfield_data.nWidthSamples;
         const ssize_t num_depth_samples = m_ColliderRef->data().hfield_data.nDepthSamples;
         const ssize_t num_total_samples = num_width_samples * num_depth_samples;
-        if ( num_depth_samples != heights.size() )
+        if ( num_total_samples != heights.size() )
         {
             LOCO_CORE_WARN( "TDartSingleBodyColliderAdapter::ChangeElevationData >>> heights-data mismatch for \
                               collider {0}", m_ColliderRef->name() );
