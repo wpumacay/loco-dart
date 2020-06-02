@@ -27,7 +27,7 @@ namespace dartsim {
     dart::dynamics::ShapePtr CreateCollisionShape( const TShapeData& data );
 
     // Creates an assimp-scene object from given user data
-    const aiScene* CreateAssimpSceneFromVertexData( const TMeshData& mesh_data );
+    const aiScene* CreateAssimpSceneFromVertexData( const std::vector<float>& vertices, const std::vector<int>& faces );
 
     // Custom ODE-like collision-filtering functionality
     class TDartBitmaskCollisionFilter : public dart::collision::BodyNodeCollisionFilter

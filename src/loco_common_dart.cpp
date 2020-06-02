@@ -115,7 +115,7 @@ namespace dartsim {
                 }
                 else if ( mesh_data.vertices.size() > 0 )
                 {
-                    if ( const auto assimp_scene = CreateAssimpSceneFromVertexData( mesh_data ) )
+                    if ( const auto assimp_scene = CreateAssimpSceneFromVertexData( mesh_data.vertices, mesh_data.faces ) )
                         return std::make_shared<dart::dynamics::ConvexHullShape>( vec3_to_eigen( data.size ), assimp_scene );
                 }
 
@@ -143,15 +143,15 @@ namespace dartsim {
         return nullptr;
     }
 
-    const aiScene* CreateAssimpSceneFromVertexData( const TMeshData& mesh_data )
+    const aiScene* CreateAssimpSceneFromVertexData( const std::vector<float>& vertices, const std::vector<int>& faces )
     {
-        if ( mesh_data.vertices.size() % 3 != 0 )
+        if ( vertices.size() % 3 != 0 )
             LOCO_CORE_ERROR( "CreateAssimpSceneFromVertexData >>> there must be 3 elements per vertex" );
-        if ( mesh_data.faces.size() % 3 != 0 )
+        if ( faces.size() % 3 != 0 )
             LOCO_CORE_ERROR( "CreateAssimpSceneFromVertexData >>> there must be 3 elements per face" );
 
-        const ssize_t num_vertices = mesh_data.vertices.size() / 3;
-        const ssize_t num_faces = mesh_data.faces.size() / 3;
+        const ssize_t num_vertices = vertices.size() / 3;
+        const ssize_t num_faces = faces.size() / 3;
 
         auto assimp_scene = new aiScene();
         assimp_scene->mMaterials = new aiMaterial*[1];
@@ -173,18 +173,18 @@ namespace dartsim {
         assimp_mesh->mNumFaces = num_faces;
         for ( ssize_t v = 0; v < num_vertices; v++ )
         {
-            assimp_mesh->mVertices[v] = aiVector3D( mesh_data.vertices[3 * v + 0],
-                                                    mesh_data.vertices[3 * v + 1],
-                                                    mesh_data.vertices[3 * v + 2] );
+            assimp_mesh->mVertices[v] = aiVector3D( vertices[3 * v + 0],
+                                                    vertices[3 * v + 1],
+                                                    vertices[3 * v + 2] );
         }
         for ( ssize_t f = 0; f < num_faces; f++ )
         {
             aiFace& assimp_face = assimp_mesh->mFaces[f];
             assimp_face.mIndices = new unsigned int[3];
             assimp_face.mNumIndices = 3;
-            assimp_face.mIndices[0] = mesh_data.faces[3 * f + 0];
-            assimp_face.mIndices[1] = mesh_data.faces[3 * f + 1];
-            assimp_face.mIndices[2] = mesh_data.faces[3 * f + 2];
+            assimp_face.mIndices[0] = faces[3 * f + 0];
+            assimp_face.mIndices[1] = faces[3 * f + 1];
+            assimp_face.mIndices[2] = faces[3 * f + 2];
         }
         //// aiExportScene( assimp_scene, "obj", "./mesh_sample.obj", 0x0 );
         return assimp_scene;
