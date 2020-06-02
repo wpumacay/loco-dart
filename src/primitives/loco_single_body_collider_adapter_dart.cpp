@@ -117,6 +117,16 @@ namespace dartsim {
         }
     }
 
+    void TDartSingleBodyColliderAdapter::ChangeVertexData( const std::vector<float>& vertices, const std::vector<int>& faces )
+    {
+        if ( !m_DartShape )
+            return;
+
+        const aiScene* new_mesh_data = CreateAssimpSceneFromVertexData( vertices, faces );
+        if ( auto convex_hull_shape = dynamic_cast<dart::dynamics::ConvexHullShape*>( m_DartShape.get() ) )
+            convex_hull_shape->setMesh( new_mesh_data );
+    }
+
     void TDartSingleBodyColliderAdapter::ChangeElevationData( const std::vector<float>& heights )
     {
         if ( !m_DartShape )

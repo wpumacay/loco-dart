@@ -28,6 +28,8 @@ namespace dartsim {
 
         void ChangeSize( const TVec3& new_size ) override;
 
+        void ChangeVertexData( const std::vector<float>& vertices, const std::vector<int>& faces );
+
         void ChangeElevationData( const std::vector<float>& heights ) override;
 
         void ChangeCollisionGroup( int collisionGroup ) override;
