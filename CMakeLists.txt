@@ -38,7 +38,7 @@ if ( LOCO_DART_IS_MASTER_PROJECT )
     set( LOCO_CORE_BUILD_TESTS ON CACHE BOOL "Don't build Loco::Core C/C++ tests" )
     set( LOCO_CORE_BUILD_PYTHON_BINDINGS ON CACHE BOOL "Build Loco::Core Python-bindings" )
     set( LOCO_CORE_BUILD_WITH_LOGS ON CACHE BOOL "Build Loco::Core using logging functionality" )
-    set( LOCO_CORE_BUILD_WITH_TRACK_ALLOCS ON CACHE BOOL "Build Loco::Core using tracking of objects allocations|deallocations" )
+    set( LOCO_CORE_BUILD_WITH_TRACK_ALLOCS OFF CACHE BOOL "Build Loco::Core using tracking of objects allocations|deallocations" )
 
     # Resources path: if not given by other project|setup-script, then use the default (this project's core/res folder location)
     if ( NOT LOCO_CORE_RESOURCES_PATH )
@@ -53,10 +53,10 @@ if ( LOCO_DART_IS_MASTER_PROJECT )
     add_subdirectory( core )
 
     # Repeat some required definitions (for dart-backend target and tests targets) #################
-    if ( LOCO_CORE_BUILD_WITH_LOGS OR ( CMAKE_BUILD_TYPE STREQUAL Debug ) )
+    if ( LOCO_CORE_BUILD_WITH_LOGS )
         add_definitions( -DLOCO_CORE_USE_LOGS )
     endif()
-    if ( LOCO_CORE_BUILD_WITH_TRACK_ALLOCS OR ( CMAKE_BUILD_TYPE STREQUAL Debug ) )
+    if ( LOCO_CORE_BUILD_WITH_TRACK_ALLOCS )
         add_definitions( -DLOCO_CORE_USE_TRACK_ALLOCS )
     endif()
 
@@ -124,10 +124,10 @@ target_compile_definitions( locoPhysicsDART PRIVATE UNIQUE_PTR_EXTENSION=1 )
 
 # ******************************************************************************
 
-if ( LOCO_DART_IS_MASTER_PROJECT AND LOCO_CORE_BUILD_TESTS )
-    enable_testing()
-    add_subdirectory( tests )
-endif()
+#### if ( LOCO_DART_IS_MASTER_PROJECT AND LOCO_CORE_BUILD_TESTS )
+####     enable_testing()
+####     add_subdirectory( tests )
+#### endif()
 
 if ( LOCO_DART_IS_MASTER_PROJECT )
     message( "|---------------------------------------------------------|" )
