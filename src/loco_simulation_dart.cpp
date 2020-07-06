@@ -2,7 +2,6 @@
 #include <loco_simulation_dart.h>
 
 namespace loco {
-namespace dartsim {
 
     /***********************************************************************************************
     *                                    Dart Simulation Impl.                                     *
@@ -15,7 +14,7 @@ namespace dartsim {
 
         m_DartWorld = dart::simulation::World::create();
         m_DartWorld->setTimeStep( m_FixedTimeStep );
-        m_DartWorld->setGravity( vec3_to_eigen( m_Gravity ) );
+        m_DartWorld->setGravity( dartsim::vec3_to_eigen( m_Gravity ) );
 
         // BULLET collision-detector: Faster for meshes, but a bit slower than the ODE version
         m_DartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::BulletCollisionDetector::create() );
@@ -29,7 +28,7 @@ namespace dartsim {
         // PROJ.-GAUSS-SEIDEL constraint-solver: More robust where dantzig fails, but still fails in some cases (@todo: test+document failure cases)
         //// boxed_lcp_constraint_solver->setBoxedLcpSolver( std::make_shared<dart::constraint::PgsBoxedLcpSolver>() );
 
-        m_DartWorld->getConstraintSolver()->getCollisionOption().collisionFilter = std::make_shared<TDartBitmaskCollisionFilter>();
+        m_DartWorld->getConstraintSolver()->getCollisionOption().collisionFilter = std::make_shared<dartsim::TDartBitmaskCollisionFilter>();
 
         _CreateSingleBodyAdapters();
         //// _CreateCompoundAdapters();
@@ -49,7 +48,7 @@ namespace dartsim {
         auto single_bodies = m_ScenarioRef->GetSingleBodiesList();
         for ( auto single_body : single_bodies )
         {
-            auto single_body_adapter = std::make_unique<TDartSingleBodyAdapter>( single_body );
+            auto single_body_adapter = std::make_unique<primitives::TDartSingleBodyAdapter>( single_body );
             single_body->SetBodyAdapter( single_body_adapter.get() );
             m_SingleBodyAdapters.push_back( std::move( single_body_adapter ) );
         }
@@ -71,14 +70,14 @@ namespace dartsim {
     {
         for ( auto& single_body_adapter : m_SingleBodyAdapters )
         {
-            if ( auto dart_adapter = dynamic_cast<TDartSingleBodyAdapter*>( single_body_adapter.get() ) )
+            if ( auto dart_adapter = dynamic_cast<primitives::TDartSingleBodyAdapter*>( single_body_adapter.get() ) )
                 dart_adapter->SetDartWorld( m_DartWorld.get() );
         }
 
         // Collect dart-resources from the adapters and assemble any required resources
         // @todo: implement-me ...
 
-        LOCO_CORE_TRACE( "Dart-backend >>> gravity      : {0}", ToString( vec3_from_eigen( m_DartWorld->getGravity() ) ) );
+        LOCO_CORE_TRACE( "Dart-backend >>> gravity      : {0}", ToString( dartsim::vec3_from_eigen( m_DartWorld->getGravity() ) ) );
         LOCO_CORE_TRACE( "Dart-backend >>> time-step    : {0}", std::to_string( m_DartWorld->getTimeStep() ) );
         LOCO_CORE_TRACE( "Dart-backend >>> num-skeletons: {0}", std::to_string( m_DartWorld->getNumSkeletons() ) );
 
@@ -95,7 +94,7 @@ namespace dartsim {
         for ( auto single_body : single_bodies )
         {
             auto collider = single_body->collider();
-            auto dart_collider_adapter = static_cast<TDartSingleBodyColliderAdapter*>( collider->collider_adapter() );
+            auto dart_collider_adapter = static_cast<primitives::TDartSingleBodyColliderAdapter*>( collider->collider_adapter() );
             const dart::dynamics::Shape* dart_collider_shape = dart_collider_adapter->collision_shape().get();
             shape_to_collider[dart_collider_shape] = collider->name();
         }
@@ -117,8 +116,8 @@ namespace dartsim {
 
             const std::string collider_1 = shape_to_collider[collider_shape_1];
             const std::string collider_2 = shape_to_collider[collider_shape_2];
-            const TVec3 position = vec3_from_eigen( contact_info.point );
-            const TVec3 normal = vec3_from_eigen( contact_info.normal );
+            const TVec3 position = dartsim::vec3_from_eigen( contact_info.point );
+            const TVec3 normal = dartsim::vec3_from_eigen( contact_info.normal );
 
             if ( detected_contacts.find( collider_1 ) == detected_contacts.end() )
                 detected_contacts[collider_1] = std::vector<TContactData>();
@@ -142,8 +141,6 @@ namespace dartsim {
             collider->contacts().clear();
             if ( detected_contacts.find( collider_name ) != detected_contacts.end() )
                 collider->contacts() = detected_contacts[collider_name];
-
-            LOCO_CORE_INFO( "collider: {0}, num_contacts: {1}", collider_name, collider->contacts().size() );
         }
     }
 
@@ -187,12 +184,11 @@ namespace dartsim {
     {
         LOCO_CORE_ASSERT( m_DartWorld, "TDartSimulation::_SetGravityInternal >>> \
                           dart-world is required, but got nullptr instead" );
-        m_DartWorld->setGravity( vec3_to_eigen( gravity ) );
+        m_DartWorld->setGravity( dartsim::vec3_to_eigen( gravity ) );
     }
 
     extern "C" TISimulation* simulation_create( TScenario* scenarioRef )
     {
-        return new loco::dartsim::TDartSimulation( scenarioRef );
+        return new loco::TDartSimulation( scenarioRef );
     }
-
-}}
+}

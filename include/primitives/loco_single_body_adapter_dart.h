@@ -6,11 +6,12 @@
 #include <primitives/loco_single_body_adapter.h>
 
 namespace loco {
+namespace primitives {
     class TSingleBody;
-}
+}}
 
 namespace loco {
-namespace dartsim {
+namespace primitives {
 
     class TDartSingleBodyAdapter : public TISingleBodyAdapter
     {

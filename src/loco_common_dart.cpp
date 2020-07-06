@@ -105,7 +105,7 @@ namespace dartsim {
                 return std::make_shared<dart::dynamics::CapsuleShape>( data.size.x(), data.size.y() );
             case eShapeType::ELLIPSOID :
                 return std::make_shared<dart::dynamics::EllipsoidShape>( 2.0 * vec3_to_eigen( data.size ) );
-            case eShapeType::MESH :
+            case eShapeType::CONVEX_MESH :
             {
                 const auto& mesh_data = data.mesh_data;
                 if ( mesh_data.filename != "" )
@@ -119,10 +119,27 @@ namespace dartsim {
                         return std::make_shared<dart::dynamics::ConvexHullShape>( vec3_to_eigen( data.size ), assimp_scene );
                 }
 
-                LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart mesh-shape" );
+                LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart convex-hull-mesh-shape" );
                 return nullptr;
             }
-            case eShapeType::HFIELD :
+            case eShapeType::TRIANGULAR_MESH :
+            {
+                const auto& mesh_data = data.mesh_data;
+                if ( mesh_data.filename != "" )
+                {
+                    if ( const auto assimp_scene = dart::dynamics::TriangleMeshShape::loadMesh( mesh_data.filename ) )
+                        return std::make_shared<dart::dynamics::TriangleMeshShape>( vec3_to_eigen( data.size ), assimp_scene );
+                }
+                else if ( mesh_data.vertices.size() > 0 && mesh_data.faces.size() > 0 )
+                {
+                    if ( const auto assimp_scene = CreateAssimpSceneFromVertexData( mesh_data.vertices, mesh_data.faces ) )
+                        return std::make_shared<dart::dynamics::TriangleMeshShape>( vec3_to_eigen( data.size ), assimp_scene );
+                }
+
+                LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart triangle-mesh-shape" );
+                return nullptr;
+            }
+            case eShapeType::HEIGHTFIELD :
             {
                 const auto& hfield_data = data.hfield_data;
                 const ssize_t num_width_samples = hfield_data.nWidthSamples;

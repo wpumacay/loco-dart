@@ -2,7 +2,7 @@
 #include <primitives/loco_single_body_adapter_dart.h>
 
 namespace loco {
-namespace dartsim {
+namespace primitives {
 
     TDartSingleBodyAdapter::TDartSingleBodyAdapter( TSingleBody* body_ref )
         : TISingleBodyAdapter( body_ref )
@@ -224,7 +224,7 @@ namespace dartsim {
         if ( m_BodyRef->constraint() )
             return;
 
-        auto dart_tf = mat4_to_eigen_tf( transform );
+        auto dart_tf = dartsim::mat4_to_eigen_tf( transform );
         if ( m_BodyRef->dyntype() == eDynamicsType::DYNAMIC )
             static_cast<dart::dynamics::FreeJoint*>( m_DartJointRef )->setTransform( dart_tf );
         else
@@ -252,7 +252,7 @@ namespace dartsim {
         center_tf.translation() = m_DartSkeleton->getCOM();
 
         dart::dynamics::SimpleFrame center( dart::dynamics::Frame::World(), "center", center_tf );
-        center.setClassicDerivatives( vec3_to_eigen( linear_vel ), m_DartBodyNodeRef->getAngularVelocity() );
+        center.setClassicDerivatives( dartsim::vec3_to_eigen( linear_vel ), m_DartBodyNodeRef->getAngularVelocity() );
 
         dart::dynamics::SimpleFrame ref( &center, "root_reference" );
         ref.setRelativeTransform( m_DartBodyNodeRef->getTransform( &center ) );
@@ -281,7 +281,7 @@ namespace dartsim {
         center_tf.translation() = m_DartSkeleton->getCOM();
 
         dart::dynamics::SimpleFrame center( dart::dynamics::Frame::World(), "center", center_tf );
-        center.setClassicDerivatives( m_DartBodyNodeRef->getLinearVelocity(), vec3_to_eigen( angular_vel ) );
+        center.setClassicDerivatives( m_DartBodyNodeRef->getLinearVelocity(), dartsim::vec3_to_eigen( angular_vel ) );
 
         dart::dynamics::SimpleFrame ref( &center, "root_reference" );
         ref.setRelativeTransform( m_DartBodyNodeRef->getTransform( &center ) );
@@ -294,7 +294,7 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::SetForceCOM >>> body {0} must have \
                           a valid dart-bodynode to set a force @ com. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
-        m_DartBodyNodeRef->setExtForce( vec3_to_eigen( force_com ) );
+        m_DartBodyNodeRef->setExtForce( dartsim::vec3_to_eigen( force_com ) );
     }
 
     void TDartSingleBodyAdapter::SetTorqueCOM( const TVec3& torque_com )
@@ -302,7 +302,7 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::SetTorqueCOM >>> body {0} must have \
                           a valid dart-bodynode to set a torque @ com. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
-        m_DartBodyNodeRef->setExtTorque( vec3_to_eigen( torque_com ) );
+        m_DartBodyNodeRef->setExtTorque( dartsim::vec3_to_eigen( torque_com ) );
     }
 
     void TDartSingleBodyAdapter::GetTransform( TMat4& dst_transform )
@@ -310,7 +310,7 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::GetTransform >>> body {0} must have \
                           a valid dart-bodynode to get its transform. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
-        dst_transform = mat4_from_eigen_tf( m_DartBodyNodeRef->getTransform() );
+        dst_transform = dartsim::mat4_from_eigen_tf( m_DartBodyNodeRef->getTransform() );
     }
 
     void TDartSingleBodyAdapter::GetLinearVelocity( TVec3& dst_linear_vel )
@@ -318,7 +318,7 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::GetLinearVelocity >>> body {0} must have \
                           a valid dart-bodynode to get its linear velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
-        dst_linear_vel = vec3_from_eigen( m_DartBodyNodeRef->getLinearVelocity() );
+        dst_linear_vel = dartsim::vec3_from_eigen( m_DartBodyNodeRef->getLinearVelocity() );
     }
 
     void TDartSingleBodyAdapter::GetAngularVelocity( TVec3& dst_angular_vel )
@@ -326,7 +326,7 @@ namespace dartsim {
         LOCO_CORE_ASSERT( m_DartBodyNodeRef, "TDartSingleBodyAdapter::GetAngularVelocity >>> body {0} must have \
                           a valid dart-bodynode to get its angular velocity. Perhaps missing call to ->Build()", m_BodyRef->name() );
 
-        dst_angular_vel = vec3_from_eigen( m_DartBodyNodeRef->getAngularVelocity() );
+        dst_angular_vel = dartsim::vec3_from_eigen( m_DartBodyNodeRef->getAngularVelocity() );
     }
 
     void TDartSingleBodyAdapter::SetDartWorld( dart::simulation::World* world_ref )

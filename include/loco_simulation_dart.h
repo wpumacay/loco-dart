@@ -7,7 +7,6 @@
 #include <primitives/loco_single_body_adapter_dart.h>
 
 namespace loco {
-namespace dartsim {
 
     class TDartSimulation : public TISimulation
     {
@@ -60,5 +59,4 @@ namespace dartsim {
     };
 
     extern "C" TISimulation* simulation_create( TScenario* scenarioRef );
-
-}}
+}

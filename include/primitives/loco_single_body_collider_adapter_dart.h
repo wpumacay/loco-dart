@@ -4,7 +4,7 @@
 #include <primitives/loco_single_body_collider_adapter.h>
 
 namespace loco {
-namespace dartsim {
+namespace primitives {
 
     const float LOCO_DART_HFIELD_BASE = 1.0f;
 
@@ -55,5 +55,4 @@ namespace dartsim {
         // Reference to the internal dart world
         dart::simulation::World* m_DartWorldRef;
     };
-
 }}

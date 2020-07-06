@@ -2,7 +2,7 @@
 #include <primitives/loco_single_body_constraint_adapter_dart.h>
 
 namespace loco {
-namespace dartsim {
+namespace primitives {
 
     //********************************************************************************************//
     //                              Dart-Adapter Interface Impl.                                //
@@ -39,11 +39,11 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( TVec3( revolute_constraint->local_tf().col( 3 ) ) );
-        const Eigen::Matrix3d jnt_rot_local = mat3_to_eigen( TMat3( revolute_constraint->local_tf() ) );
-        const Eigen::Vector3d jnt_axis_world = vec3_to_eigen( TMat3( revolute_constraint->local_tf() ) * revolute_constraint->axis() );
-        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
-        const Eigen::Matrix3d body_rot_world = mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
+        const Eigen::Vector3d jnt_pos_local = dartsim::vec3_to_eigen( TVec3( revolute_constraint->local_tf().col( 3 ) ) );
+        const Eigen::Matrix3d jnt_rot_local = dartsim::mat3_to_eigen( TMat3( revolute_constraint->local_tf() ) );
+        const Eigen::Vector3d jnt_axis_world = dartsim::vec3_to_eigen( TMat3( revolute_constraint->local_tf() ) * revolute_constraint->axis() );
+        const Eigen::Vector3d body_pos_world = dartsim::vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Matrix3d body_rot_world = dartsim::mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
         const Eigen::Vector3d jnt_pos_world = body_pos_world + body_rot_world * jnt_pos_local;
         const Eigen::Matrix3d jnt_rot_world = body_rot_world;
 
@@ -128,11 +128,11 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( TVec3( prismatic_constraint->local_tf().col( 3 ) ) );
-        const Eigen::Matrix3d jnt_rot_local = mat3_to_eigen( TMat3( prismatic_constraint->local_tf() ) );
-        const Eigen::Vector3d jnt_axis_world = vec3_to_eigen( TMat3( prismatic_constraint->local_tf() ) * prismatic_constraint->axis() );
-        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
-        const Eigen::Matrix3d body_rot_world = mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
+        const Eigen::Vector3d jnt_pos_local = dartsim::vec3_to_eigen( TVec3( prismatic_constraint->local_tf().col( 3 ) ) );
+        const Eigen::Matrix3d jnt_rot_local = dartsim::mat3_to_eigen( TMat3( prismatic_constraint->local_tf() ) );
+        const Eigen::Vector3d jnt_axis_world = dartsim::vec3_to_eigen( TMat3( prismatic_constraint->local_tf() ) * prismatic_constraint->axis() );
+        const Eigen::Vector3d body_pos_world = dartsim::vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Matrix3d body_rot_world = dartsim::mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
         const Eigen::Vector3d jnt_pos_world = body_pos_world + body_rot_world * jnt_pos_local;
         const Eigen::Matrix3d jnt_rot_world = body_rot_world;
 
@@ -214,10 +214,10 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( TVec3( m_ConstraintRef->local_tf().col( 3 ) ) );
-        const Eigen::Matrix3d jnt_rot_local = mat3_to_eigen( TMat3( m_ConstraintRef->local_tf() ) );
-        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
-        const Eigen::Matrix3d body_rot_world = mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
+        const Eigen::Vector3d jnt_pos_local = dartsim::vec3_to_eigen( TVec3( m_ConstraintRef->local_tf().col( 3 ) ) );
+        const Eigen::Matrix3d jnt_rot_local = dartsim::mat3_to_eigen( TMat3( m_ConstraintRef->local_tf() ) );
+        const Eigen::Vector3d body_pos_world = dartsim::vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Matrix3d body_rot_world = dartsim::mat3_to_eigen( m_ConstraintRef->parent()->rot0() );
         const Eigen::Vector3d jnt_pos_world = body_pos_world + body_rot_world * jnt_pos_local;
         const Eigen::Matrix3d jnt_rot_world = body_rot_world;
 
@@ -277,8 +277,8 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
-        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( { 0.0, 0.0, 0.0 } );
+        const Eigen::Vector3d body_pos_world = dartsim::vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Vector3d jnt_pos_local = dartsim::vec3_to_eigen( { 0.0, 0.0, 0.0 } );
         const Eigen::Vector3d jnt_pos_world = body_pos_world + jnt_pos_local; // rotation is identity
 
         dart::dynamics::TranslationalJoint::Properties jnt_properties;
@@ -335,8 +335,8 @@ namespace dartsim {
         const std::string body_name = m_ConstraintRef->parent()->name();
         const std::string joint_name = m_ConstraintRef->name();
 
-        const Eigen::Vector3d body_pos_world = vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
-        const Eigen::Vector3d jnt_pos_local = vec3_to_eigen( { 0.0, 0.0, 0.0 } );
+        const Eigen::Vector3d body_pos_world = dartsim::vec3_to_eigen( m_ConstraintRef->parent()->pos0() );
+        const Eigen::Vector3d jnt_pos_local = dartsim::vec3_to_eigen( { 0.0, 0.0, 0.0 } );
         const Eigen::Vector3d jnt_pos_world = body_pos_world + jnt_pos_local; // rotation is identity
 
         dart::dynamics::PlanarJoint::Properties jnt_properties;

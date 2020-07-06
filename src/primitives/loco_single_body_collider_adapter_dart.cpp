@@ -2,7 +2,7 @@
 #include <primitives/loco_single_body_collider_adapter_dart.h>
 
 namespace loco {
-namespace dartsim {
+namespace primitives {
 
     TDartSingleBodyColliderAdapter::TDartSingleBodyColliderAdapter( TSingleBodyCollider* collision_ref )
         : TISingleBodyColliderAdapter( collision_ref )
@@ -25,7 +25,7 @@ namespace dartsim {
 
     void TDartSingleBodyColliderAdapter::Build()
     {
-        m_DartShape = CreateCollisionShape( m_ColliderRef->data() );
+        m_DartShape = dartsim::CreateCollisionShape( m_ColliderRef->data() );
         m_DartShapeNodeRef = nullptr;
         m_DartWorldRef = nullptr;
     }
@@ -36,7 +36,7 @@ namespace dartsim {
                           valid reference to the dart-world object to initialize collider {0}", m_ColliderRef->name() );
 
         auto& collision_filter = m_DartWorldRef->getConstraintSolver()->getCollisionOption().collisionFilter;
-        auto bitmask_collision_filter = dynamic_cast<TDartBitmaskCollisionFilter*>( collision_filter.get() );
+        auto bitmask_collision_filter = dynamic_cast<dartsim::TDartBitmaskCollisionFilter*>( collision_filter.get() );
         if ( bitmask_collision_filter )
         {
             bitmask_collision_filter->setCollisionGroup( m_DartShapeNodeRef, m_ColliderRef->collisionGroup() );
@@ -61,7 +61,7 @@ namespace dartsim {
             case eShapeType::BOX :
             {
                 if ( auto box_shape = dynamic_cast<dart::dynamics::BoxShape*>( m_DartShape.get() ) )
-                    box_shape->setSize( vec3_to_eigen( new_size ) );
+                    box_shape->setSize( dartsim::vec3_to_eigen( new_size ) );
                 break;
             }
             case eShapeType::SPHERE :
@@ -91,16 +91,22 @@ namespace dartsim {
             case eShapeType::ELLIPSOID :
             {
                 if ( auto ellipsoid_shape = dynamic_cast<dart::dynamics::EllipsoidShape*>( m_DartShape.get() ) )
-                    ellipsoid_shape->setDiameters( 2.0 * vec3_to_eigen( new_size ) );
+                    ellipsoid_shape->setDiameters( 2.0 * dartsim::vec3_to_eigen( new_size ) );
                 break;
             }
-            case eShapeType::MESH :
+            case eShapeType::CONVEX_MESH :
             {
                 if ( auto mesh_shape = dynamic_cast<dart::dynamics::ConvexHullShape*>( m_DartShape.get() ) )
-                    mesh_shape->setScale( vec3_to_eigen( new_size ) );
+                    mesh_shape->setScale( dartsim::vec3_to_eigen( new_size ) );
                 break;
             }
-            case eShapeType::HFIELD :
+            case eShapeType::TRIANGULAR_MESH :
+            {
+                if ( auto mesh_shape = dynamic_cast<dart::dynamics::TriangleMeshShape*>( m_DartShape.get() ) )
+                    mesh_shape->setScale( dartsim::vec3_to_eigen( new_size ) );
+                break;
+            }
+            case eShapeType::HEIGHTFIELD :
             {
                 if ( auto hfield_shape = dynamic_cast<dart::dynamics::HeightmapShapef*>( m_DartShape.get() ) )
                 {
@@ -122,7 +128,7 @@ namespace dartsim {
         if ( !m_DartShape )
             return;
 
-        const aiScene* new_mesh_data = CreateAssimpSceneFromVertexData( vertices, faces );
+        const aiScene* new_mesh_data = dartsim::CreateAssimpSceneFromVertexData( vertices, faces );
         if ( auto convex_hull_shape = dynamic_cast<dart::dynamics::ConvexHullShape*>( m_DartShape.get() ) )
             convex_hull_shape->setMesh( new_mesh_data );
     }
@@ -189,5 +195,4 @@ namespace dartsim {
 
         m_DartShapeNodeRef->getDynamicsAspect()->setFrictionCoeff( friction );
     }
-
 }}

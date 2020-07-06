@@ -4,11 +4,12 @@
 #include <primitives/loco_single_body_constraint_adapter.h>
 
 namespace loco {
+namespace primitives {
     class TISingleBodyConstraint;
-}
+}}
 
 namespace loco {
-namespace dartsim {
+namespace primitives {
 
     class TIDartSingleBodyConstraintAdapter
     {
@@ -183,5 +184,4 @@ namespace dartsim {
 
         void _SetGeneralizedSpeed( const TVec3& txz_ry_speed );
     };
-
 }}
