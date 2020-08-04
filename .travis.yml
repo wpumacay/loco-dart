@@ -47,7 +47,7 @@ before_install:
   - cd dart_sim && mkdir build && cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/.dart
   - make -j4
-  - make install
+  - make install && cd ../../ && rm -rf dart_sim
   - export LD_LIBRARY_PATH="~/.dart/lib:$LD_LIBRARY_PATH"
   - echo "Configuring anaconda and making and env. for the build ..."
   - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
