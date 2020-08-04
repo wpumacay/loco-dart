@@ -22,11 +22,35 @@ at wpumacay@gmail.com .
 
 #### Ubuntu >= 16.04
 
+Install dependencies for the visualizer:
+
 ```bash
+# build-tools
 sudo apt install make cmake pkg-config
+# dependencies for the visualizer
 sudo apt install libglfw3-dev libglew-dev
+```
+
+Install dependencies for `DART-sim`:
+
+```bash
 # DART-sim dependencies
-sudo apt install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev libopenscenegraph-dev
+sudo apt install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev libopenscenegraph-dev libbullet-dev
+```
+
+Install fork of `DART-sim` to the `~/.dart` location:
+
+```bash
+# Get our fork of dart-sim (adds some helper functionality)
+git clone https://github.com/wpumacay/dart
+# Build dart-sim in release-mode and using shared-libraries
+cd dart && mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/.dart
+make -j4
+# Install dart-sim to the ~/.dart location in your system
+make install
+# Add libraries to library PATH (add this line to the bottom of your .bashrc file)
+export LD_LIBRARY_PATH="~/.dart/lib:$LD_LIBRARY_PATH"
 ```
 
 ### Building

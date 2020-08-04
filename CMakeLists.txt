@@ -89,6 +89,8 @@ if ( LOCO_DART_IS_MASTER_PROJECT )
 endif()
 
 find_package( assimp REQUIRED )
+find_package( Eigen3 REQUIRED )
+find_package( Bullet REQUIRED )
 
 set( LOCO_DART_SRCS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/loco_common_dart.cpp"
@@ -105,22 +107,30 @@ set( LOCO_DART_INCLUDE_DIRS
      "${CMAKE_SOURCE_DIR}/ext/spdlog/include"
      "${CMAKE_SOURCE_DIR}/ext/tiny_math/include"
      "${CMAKE_SOURCE_DIR}/ext/tiny_utils/include"
-     "${CMAKE_SOURCE_DIR}/ext/dart"
-     "${CMAKE_BINARY_DIR}/ext/dart"
-     "${EIGEN3_INCLUDE_DIR}" )
-include_directories( ${LOCO_DART_INCLUDE_DIRS} )
+     "${EIGEN3_INCLUDE_DIR}"
+     "${BULLET_INCLUDE_DIRS}" )
 
-# Configure the resulting library
+# Configure external dependency: DART physics engine (locate in installation folder)
+if ( WIN32 )
+    set( LOCO_DART_INCLUDE_DIRS "C:/.dart/include" "${LOCO_DART_INCLUDE_DIRS}" )
+    link_directories( "C:/.dart/lib" )
+elseif ( UNIX )
+    set( LOCO_DART_INCLUDE_DIRS "~/.dart/include" "${LOCO_DART_INCLUDE_DIRS}" )
+    link_directories( "~/.dart/lib" )
+else()
+    message( "LOCO::DART >> UNSUPPORTED OS-TYPE" )
+endif()
+include_directories( ${LOCO_DART_INCLUDE_DIRS} )
+message( "LOCO::DART >> Include directories: ${LOCO_DART_INCLUDE_DIRS}" )
+
+# Configure target locoPhysicsDART library
 add_library( locoPhysicsDART SHARED
              ${LOCO_DART_SRCS} )
 target_link_libraries( locoPhysicsDART
                        loco_core
                        assimp
                        dart
-                       dart-collision-bullet
-                       dart-collision-ode )
-# g++8 already supports make_unique, so don't use extension decleared in core/loco_common.h
-target_compile_definitions( locoPhysicsDART PRIVATE UNIQUE_PTR_EXTENSION=1 )
+                       dart-collision-bullet )
 
 # ******************************************************************************
 
