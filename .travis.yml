@@ -38,9 +38,17 @@ before_install:
   - sudo apt-get -y install libassimp-dev libglfw3-dev libglew-dev
   - sudo apt-get -y install libbullet-dev libode-dev
   - sudo apt-get -y install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev libopenscenegraph-dev
+  - sudo apt-get -y install libbullet-dev libode-dev
   - sudo apt-get -y install ffmpeg
   - echo "Cloning repo-dependencies from github ..."
   - ./scripts/setup_dependencies.sh
+  - echo "Installing dart-sim to ~/.dart install location"
+  - git clone https://github.com/wpumacay/dart dart_sim
+  - cd dart_sim && mkdir build && cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=~/.dart
+  - make -j4
+  - make install
+  - export LD_LIBRARY_PATH="~/.dart/lib:$LD_LIBRARY_PATH"
   - echo "Configuring anaconda and making and env. for the build ..."
   - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
