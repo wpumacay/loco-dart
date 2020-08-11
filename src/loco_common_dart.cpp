@@ -154,6 +154,13 @@ namespace dartsim {
                 hfield_shape->setScale( Eigen::Vector3f( scale_x, scale_y, scale_z ) );
                 return hfield_shape;
             }
+            case eShapeType::COMPOUND :
+            {
+                auto compound_shape = std::make_shared<dart::dynamics::CompoundShape>();
+                for ( ssize_t i = 0; i < data.children.size(); i++ )
+                    compound_shape->addChild( CreateCollisionShape( data.children[i] ), mat4_to_eigen_tf( data.children_tfs[i] ) );
+                return compound_shape;
+            }
         }
 
         LOCO_CORE_ERROR( "CreateCollisionShape >>> Couldn't create dart coll-shape" );
