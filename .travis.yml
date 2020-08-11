@@ -38,7 +38,6 @@ before_install:
   - sudo apt-get -y install libassimp-dev libglfw3-dev libglew-dev
   - sudo apt-get -y install libbullet-dev libode-dev
   - sudo apt-get -y install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev libopenscenegraph-dev
-  - sudo apt-get -y install libbullet-dev libode-dev
   - sudo apt-get -y install ffmpeg
   - echo "Cloning repo-dependencies from github ..."
   - ./scripts/setup_dependencies.sh

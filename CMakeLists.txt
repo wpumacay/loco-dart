@@ -110,7 +110,7 @@ set( LOCO_DART_INCLUDE_DIRS
      "${EIGEN3_INCLUDE_DIR}"
      "${BULLET_INCLUDE_DIRS}" )
 
-# Configure external dependency: DART physics engine (locate in installation folder)
+# Configure external dependency: DART physics engine (located in ~/.dart installation folder)
 if ( WIN32 )
     set( LOCO_DART_INCLUDE_DIRS "C:/.dart/include" "${LOCO_DART_INCLUDE_DIRS}" )
     link_directories( "C:/.dart/lib" )
@@ -121,7 +121,6 @@ else()
     message( "LOCO::DART >> UNSUPPORTED OS-TYPE" )
 endif()
 include_directories( ${LOCO_DART_INCLUDE_DIRS} )
-message( "LOCO::DART >> Include directories: ${LOCO_DART_INCLUDE_DIRS}" )
 
 # Configure target locoPhysicsDART library
 add_library( locoPhysicsDART SHARED
