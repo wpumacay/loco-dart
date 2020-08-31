@@ -15,9 +15,11 @@
 # folder-exclusions
 build/
 .vscode/
+.idea/
 dist/
 pytysoc.egg-info/
 tysoc_dart.egg-info/
+cmake-build*
 
 # dependencies-exclusions
 ext/tiny_math*

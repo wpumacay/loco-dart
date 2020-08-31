@@ -5,7 +5,6 @@
 // Main Dart-API
 #include <dart/dart.hpp>
 #include <dart/collision/bullet/BulletCollisionDetector.hpp>
-#include <dart/collision/ode/OdeCollisionDetector.hpp>
 
 namespace loco {
 namespace dartsim {

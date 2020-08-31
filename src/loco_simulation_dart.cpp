@@ -18,8 +18,6 @@ namespace loco {
 
         // BULLET collision-detector: Faster for meshes, but a bit slower than the ODE version
         m_DartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::BulletCollisionDetector::create() );
-        // ODE collision-detector: Faster for primitives, but meshes are awfully slow (should use cvx-hull)
-        //// m_DartWorld->getConstraintSolver()->setCollisionDetector( dart::collision::OdeCollisionDetector::create() );
 
         auto boxed_lcp_constraint_solver = dynamic_cast<dart::constraint::BoxedLcpConstraintSolver*>( m_DartWorld->getConstraintSolver() );
         // DANTZIG constraint-solver: Seems faster, but breaks in some cases (@todo: test+document failure cases)
