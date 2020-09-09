@@ -1,5 +1,5 @@
 
-#include <kinematic_trees/loco_kinematic_tree_joints_adapter.h>
+#include <kinematic_trees/loco_kinematic_tree_joint_adapter_dart.h>
 
 namespace loco {
 namespace kintree {
@@ -16,9 +16,11 @@ namespace kintree {
 
     void TDartKinematicTreeJointAdapter::Build()
     {
+        LOCO_CORE_ASSERT( m_DartSkeletonRef, "" );
+
         const auto joint_type = m_JointRef->type();
         const auto joint_name = m_JointRef->name();
-        const auto joint_data = joint_ref->data();
+        const auto joint_data = m_JointRef->data();
         const auto joint_local_tf = joint_data.local_tf;
         const auto joint_local_axis = joint_data.local_axis;
 
@@ -30,7 +32,7 @@ namespace kintree {
 
         const Eigen::Vector3d jnt_pos_local = dartsim::vec3_to_eigen( TVec3( joint_local_tf.col( 3 ) ) );
         const Eigen::Matrix3d jnt_rot_local = dartsim::mat3_to_eigen( TMat3( joint_local_tf ) );
-        const Eigen::Vector3d jnt_axis_body_frame = dartsim::vec3_to_eigen( TMat3( local_tf ) * joint_local_axis );
+        const Eigen::Vector3d jnt_axis_body_frame = dartsim::vec3_to_eigen( TMat3( joint_local_tf ) * joint_local_axis );
         const Eigen::Vector3d body_pos_parent_to_joint = dartsim::vec3_to_eigen( TVec3( tf_body_parent_parent_to_joint.col( 3 ) ) );
         const Eigen::Matrix3d body_rot_parent_to_joint = dartsim::mat3_to_eigen( TMat3( tf_body_parent_parent_to_joint ) );
 
@@ -55,6 +57,8 @@ namespace kintree {
 
             auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::RevoluteJoint>(
                                             dart_body_parent_parent_bodynode, jnt_properties, body_properties );
+            m_DartJointRef = joint_bodynode_pair.first;
+            m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else if ( joint_type == eJointType::PRISMATIC )
         {
@@ -74,6 +78,8 @@ namespace kintree {
 
             auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::PrismaticJoint>(
                                             dart_body_parent_parent_bodynode, jnt_properties, body_properties );
+            m_DartJointRef = joint_bodynode_pair.first;
+            m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else if ( joint_type == eJointType::SPHERICAL )
         {
@@ -89,6 +95,8 @@ namespace kintree {
 
             auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::BallJoint>(
                                             dart_body_parent_parent_bodynode, jnt_properties, body_properties );
+            m_DartJointRef = joint_bodynode_pair.first;
+            m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else if ( joint_type == eJointType::PLANAR )
         {
@@ -105,6 +113,8 @@ namespace kintree {
 
             auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::PlanarJoint>(
                                             dart_body_parent_parent_bodynode, jnt_properties, body_properties );
+            m_DartJointRef = joint_bodynode_pair.first;
+            m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else if ( joint_type == eJointType::FIXED )
         {
@@ -120,6 +130,8 @@ namespace kintree {
 
             auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::WeldJoint>(
                                             dart_body_parent_parent_bodynode, jnt_properties, body_properties );
+            m_DartJointRef = joint_bodynode_pair.first;
+            m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else if ( joint_type == eJointType::FREE )
         {
@@ -131,6 +143,8 @@ namespace kintree {
 
             auto joint_bodynode_pair = m_DartSkeletonRef->createJointAndBodyNodePair<dart::dynamics::FreeJoint>(
                                             dart_body_parent_parent_bodynode, jnt_properties, body_properties );
+            m_DartJointRef = joint_bodynode_pair.first;
+            m_DartBodyNodeRef = joint_bodynode_pair.second;
         }
         else
         {

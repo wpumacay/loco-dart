@@ -2,6 +2,7 @@
 
 #include <loco_common_dart.h>
 #include <kinematic_trees/loco_kinematic_tree_joint_adapter.h>
+#include <kinematic_trees/loco_kineamtic_tree_body_adapter_dart.h>
 
 namespace loco {
 namespace kintree {
